@@ -1,0 +1,15 @@
+{
+  "name": "portfolio-resumeai",
+  "version": "1.0.0",
+  "description": "Portfolio + ResumeAI – Intelligent Resume Analysis System (static site)",
+  "private": true,
+  "scripts": {
+    "start": "serve . -l 3000",
+    "validate": "html-validate index.html resumeai.html dashboard.html upload.html learning.html insights.html recruiter.html",
+    "test": "npm run validate"
+  },
+  "devDependencies": {
+    "html-validate": "^9.6.0",
+    "serve": "^14.2.4"
+  }
+}

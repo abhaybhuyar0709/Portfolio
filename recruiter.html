@@ -89,13 +89,13 @@
   <main class="main-content">
     <div class="page-header">
       <div>
-        <button class="hamburger" id="sidebarToggle"><span></span><span></span><span></span></button>
+        <button aria-label="Toggle navigation menu" type="button" class="hamburger" id="sidebarToggle"><span></span><span></span><span></span></button>
         <h1 class="page-title">Recruiter Portal</h1>
         <p class="page-subtitle">Search candidates, view skill scores, and assign skill tests</p>
       </div>
       <div style="display:flex;gap:10px;align-items:center">
         <span class="badge badge-purple">🏢 Premium Account</span>
-        <button class="btn btn-primary btn-sm">+ Post a Role</button>
+        <button type="button" class="btn btn-primary btn-sm">+ Post a Role</button>
       </div>
     </div>
 
@@ -125,7 +125,7 @@
         </div>
       </div>
 
-      <!-- Search & Filters -->
+      <!-- Search &amp; Filters -->
       <div id="search" style="padding:1.25rem;background:var(--bg-card);border:1px solid var(--border-glass);border-radius:16px;margin-bottom:1.5rem">
         <div style="margin-bottom:1rem">
           <div class="search-bar">
@@ -162,16 +162,16 @@
             <option>Bangalore</option>
             <option>Hyderabad</option>
           </select>
-          <button class="btn btn-primary btn-sm">Search →</button>
+          <button type="button" class="btn btn-primary btn-sm">Search →</button>
         </div>
       </div>
 
       <!-- Tabs -->
       <div class="portal-tabs">
-        <button class="portal-tab active" onclick="switchTab(this,'candidates')">👥 Candidates (24)</button>
-        <button class="portal-tab" onclick="switchTab(this,'shortlisted')">⭐ Shortlisted (8)</button>
-        <button class="portal-tab" onclick="switchTab(this,'tests')" id="tests">📝 Skill Tests</button>
-        <button class="portal-tab" onclick="switchTab(this,'analytics')">📊 Analytics</button>
+        <button type="button" class="portal-tab active" onclick="switchTab(this,'candidates')">👥 Candidates (24)</button>
+        <button type="button" class="portal-tab" onclick="switchTab(this,'shortlisted')">⭐ Shortlisted (8)</button>
+        <button type="button" class="portal-tab" onclick="switchTab(this,'tests')" id="tests">📝 Skill Tests</button>
+        <button type="button" class="portal-tab" onclick="switchTab(this,'analytics')">📊 Analytics</button>
       </div>
 
       <!-- Candidates Tab -->
@@ -208,9 +208,9 @@
               <span class="cand-skill">AWS</span><span class="cand-skill">MongoDB</span><span class="cand-skill">TypeScript</span>
             </div>
             <div class="cand-actions">
-              <button class="btn-view" onclick="viewProfile('Arjun Mehta')">👁️ View</button>
-              <button class="btn-test" onclick="assignTest('Arjun Mehta')">📝 Test</button>
-              <button class="btn-contact" onclick="contactCandidate('Arjun Mehta')">✉️ Contact</button>
+              <button type="button" class="btn-view" onclick="viewProfile('Arjun Mehta')">👁️ View</button>
+              <button type="button" class="btn-test" onclick="assignTest('Arjun Mehta')">📝 Test</button>
+              <button type="button" class="btn-contact" onclick="contactCandidate('Arjun Mehta')">✉️ Contact</button>
             </div>
           </div>
 
@@ -244,9 +244,9 @@
               <span class="cand-skill">Pandas</span><span class="cand-skill">SQL</span><span class="cand-skill">Tableau</span>
             </div>
             <div class="cand-actions">
-              <button class="btn-view" onclick="viewProfile('Priya Sharma')">👁️ View</button>
-              <button class="btn-test" onclick="assignTest('Priya Sharma')">📝 Test</button>
-              <button class="btn-contact" onclick="contactCandidate('Priya Sharma')">✉️ Contact</button>
+              <button type="button" class="btn-view" onclick="viewProfile('Priya Sharma')">👁️ View</button>
+              <button type="button" class="btn-test" onclick="assignTest('Priya Sharma')">📝 Test</button>
+              <button type="button" class="btn-contact" onclick="contactCandidate('Priya Sharma')">✉️ Contact</button>
             </div>
           </div>
 
@@ -280,9 +280,9 @@
               <span class="cand-skill">AWS</span><span class="cand-skill">Terraform</span><span class="cand-skill">CI/CD</span>
             </div>
             <div class="cand-actions">
-              <button class="btn-view" onclick="viewProfile('Rahul Joshi')">👁️ View</button>
-              <button class="btn-test" onclick="assignTest('Rahul Joshi')">📝 Test</button>
-              <button class="btn-contact" onclick="contactCandidate('Rahul Joshi')">✉️ Contact</button>
+              <button type="button" class="btn-view" onclick="viewProfile('Rahul Joshi')">👁️ View</button>
+              <button type="button" class="btn-test" onclick="assignTest('Rahul Joshi')">📝 Test</button>
+              <button type="button" class="btn-contact" onclick="contactCandidate('Rahul Joshi')">✉️ Contact</button>
             </div>
           </div>
 
@@ -316,9 +316,9 @@
               <span class="cand-skill">Scikit-learn</span><span class="cand-skill">Python</span>
             </div>
             <div class="cand-actions">
-              <button class="btn-view" onclick="viewProfile('Sneha Patel')">👁️ View</button>
-              <button class="btn-test" onclick="assignTest('Sneha Patel')">📝 Test</button>
-              <button class="btn-contact" onclick="contactCandidate('Sneha Patel')">✉️ Contact</button>
+              <button type="button" class="btn-view" onclick="viewProfile('Sneha Patel')">👁️ View</button>
+              <button type="button" class="btn-test" onclick="assignTest('Sneha Patel')">📝 Test</button>
+              <button type="button" class="btn-contact" onclick="contactCandidate('Sneha Patel')">✉️ Contact</button>
             </div>
           </div>
 
@@ -352,9 +352,9 @@
               <span class="cand-skill">TypeScript</span><span class="cand-skill">Tailwind</span>
             </div>
             <div class="cand-actions">
-              <button class="btn-view" onclick="viewProfile('Vikram Singh')">👁️ View</button>
-              <button class="btn-test" onclick="assignTest('Vikram Singh')">📝 Test</button>
-              <button class="btn-contact" onclick="contactCandidate('Vikram Singh')">✉️ Contact</button>
+              <button type="button" class="btn-view" onclick="viewProfile('Vikram Singh')">👁️ View</button>
+              <button type="button" class="btn-test" onclick="assignTest('Vikram Singh')">📝 Test</button>
+              <button type="button" class="btn-contact" onclick="contactCandidate('Vikram Singh')">✉️ Contact</button>
             </div>
           </div>
 
@@ -388,9 +388,9 @@
               <span class="cand-skill">PostgreSQL</span><span class="cand-skill">Redis</span>
             </div>
             <div class="cand-actions">
-              <button class="btn-view" onclick="viewProfile('Ananya Roy')">👁️ View</button>
-              <button class="btn-test" onclick="assignTest('Ananya Roy')">📝 Test</button>
-              <button class="btn-contact" onclick="contactCandidate('Ananya Roy')">✉️ Contact</button>
+              <button type="button" class="btn-view" onclick="viewProfile('Ananya Roy')">👁️ View</button>
+              <button type="button" class="btn-test" onclick="assignTest('Ananya Roy')">📝 Test</button>
+              <button type="button" class="btn-contact" onclick="contactCandidate('Ananya Roy')">✉️ Contact</button>
             </div>
           </div>
 
@@ -410,7 +410,7 @@
       <div class="tab-content" id="tab-tests">
         <div style="margin-bottom:1.5rem;display:flex;justify-content:space-between;align-items:center">
           <div class="section-title-sm">📝 Available Skill Tests</div>
-          <button class="btn btn-primary btn-sm">+ Create Custom Test</button>
+          <button type="button" class="btn btn-primary btn-sm">+ Create Custom Test</button>
         </div>
         <div id="tests-list">
           <div class="test-card">
@@ -420,7 +420,7 @@
               <div class="test-meta"><span>⏱️ 60 min</span><span>❓ 40 questions</span><span>📊 Auto-graded</span></div>
             </div>
             <span class="badge badge-purple" style="margin-right:0.75rem">Intermediate</span>
-            <button class="btn-assign" onclick="assignTestToAll('React.js Test')">Assign</button>
+            <button type="button" class="btn-assign" onclick="assignTestToAll('React.js Test')">Assign</button>
           </div>
           <div class="test-card">
             <div class="test-icon" style="background:rgba(6,182,212,0.12)">☁️</div>
@@ -429,34 +429,34 @@
               <div class="test-meta"><span>⏱️ 45 min</span><span>❓ 30 questions</span><span>📊 Auto-graded</span></div>
             </div>
             <span class="badge badge-cyan" style="margin-right:0.75rem">Beginner</span>
-            <button class="btn-assign" onclick="assignTestToAll('AWS Test')">Assign</button>
+            <button type="button" class="btn-assign" onclick="assignTestToAll('AWS Test')">Assign</button>
           </div>
           <div class="test-card">
             <div class="test-icon" style="background:rgba(245,158,11,0.12)">🐍</div>
             <div style="flex:1">
-              <div class="test-name">Python & Data Science Challenge</div>
+              <div class="test-name">Python &amp; Data Science Challenge</div>
               <div class="test-meta"><span>⏱️ 90 min</span><span>❓ 5 coding tasks</span><span>📊 AI-graded</span></div>
             </div>
             <span class="badge badge-orange" style="margin-right:0.75rem">Advanced</span>
-            <button class="btn-assign" onclick="assignTestToAll('Python Test')">Assign</button>
+            <button type="button" class="btn-assign" onclick="assignTestToAll('Python Test')">Assign</button>
           </div>
           <div class="test-card">
             <div class="test-icon" style="background:rgba(99,102,241,0.12)">🐳</div>
             <div style="flex:1">
-              <div class="test-name">Docker & Kubernetes Scenarios</div>
+              <div class="test-name">Docker &amp; Kubernetes Scenarios</div>
               <div class="test-meta"><span>⏱️ 75 min</span><span>❓ 25 questions + lab</span><span>📊 Auto-graded</span></div>
             </div>
             <span class="badge badge-purple" style="margin-right:0.75rem">Advanced</span>
-            <button class="btn-assign" onclick="assignTestToAll('DevOps Test')">Assign</button>
+            <button type="button" class="btn-assign" onclick="assignTestToAll('DevOps Test')">Assign</button>
           </div>
           <div class="test-card">
             <div class="test-icon" style="background:rgba(16,185,129,0.12)">💾</div>
             <div style="flex:1">
-              <div class="test-name">SQL & Database Design</div>
+              <div class="test-name">SQL &amp; Database Design</div>
               <div class="test-meta"><span>⏱️ 50 min</span><span>❓ 35 questions</span><span>📊 Auto-graded</span></div>
             </div>
             <span class="badge badge-green" style="margin-right:0.75rem">Intermediate</span>
-            <button class="btn-assign" onclick="assignTestToAll('SQL Test')">Assign</button>
+            <button type="button" class="btn-assign" onclick="assignTestToAll('SQL Test')">Assign</button>
           </div>
         </div>
       </div>
@@ -487,13 +487,13 @@
 <div id="profileModal" style="display:none;position:fixed;inset:0;z-index:200;background:rgba(0,0,0,0.7);backdrop-filter:blur(6px);align-items:center;justify-content:center">
   <div style="background:#0f1629;border:1px solid rgba(99,102,241,0.25);border-radius:20px;padding:2rem;max-width:480px;width:90%;max-height:80vh;overflow-y:auto">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem">
-      <h3 id="modalCandName" style="font-size:1.1rem;font-weight:700;color:var(--text-primary)"></h3>
-      <button onclick="closeModal()" style="background:rgba(255,255,255,0.06);border:none;color:var(--text-muted);width:32px;height:32px;border-radius:50%;cursor:pointer;font-size:1rem">✕</button>
+      <h3 id="modalCandName" style="font-size:1.1rem;font-weight:700;color:var(--text-primary)">&#8203;</h3>
+      <button type="button" aria-label="Close modal" onclick="closeModal()" style="background:rgba(255,255,255,0.06);border:none;color:var(--text-muted);width:32px;height:32px;border-radius:50%;cursor:pointer;font-size:1rem">✕</button>
     </div>
     <p id="modalContent" style="color:var(--text-secondary);font-size:0.9rem;line-height:1.7"></p>
     <div style="display:flex;gap:10px;margin-top:1.5rem">
-      <button onclick="closeModal()" class="btn btn-secondary btn-sm" style="flex:1;justify-content:center">Close</button>
-      <button class="btn btn-primary btn-sm" style="flex:1;justify-content:center">⭐ Shortlist</button>
+      <button type="button" onclick="closeModal()" class="btn btn-secondary btn-sm" style="flex:1;justify-content:center">Close</button>
+      <button type="button" class="btn btn-primary btn-sm" style="flex:1;justify-content:center">⭐ Shortlist</button>
     </div>
   </div>
 </div>

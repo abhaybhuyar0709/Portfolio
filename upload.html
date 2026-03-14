@@ -71,9 +71,9 @@
   <main class="main-content">
     <div class="page-header">
       <div>
-        <button class="hamburger" id="sidebarToggle"><span></span><span></span><span></span></button>
+        <button aria-label="Toggle navigation menu" type="button" class="hamburger" id="sidebarToggle"><span></span><span></span><span></span></button>
         <h1 class="page-title">Upload Resume</h1>
-        <p class="page-subtitle">Drag & drop your resume for instant AI analysis</p>
+        <p class="page-subtitle">Drag &amp; drop your resume for instant AI analysis</p>
       </div>
       <div style="display:flex;gap:10px">
         <select style="background:var(--bg-card);border:1px solid var(--border-glass);color:var(--text-secondary);padding:8px 14px;border-radius:10px;font-size:0.88rem;outline:none;cursor:pointer">
@@ -95,13 +95,13 @@
             <span class="upload-icon">☁️</span>
             <h3 style="font-size:1.2rem;font-weight:700;color:var(--text-primary);margin-bottom:0.5rem">Drop your resume here</h3>
             <p style="font-size:0.88rem;color:var(--text-muted);margin-bottom:1.5rem">Supports PDF, DOC, DOCX — max 10MB</p>
-            <button class="btn btn-primary">Browse Files</button>
+            <button type="button" class="btn btn-primary">Browse Files</button>
             <input type="file" id="resumeFile" accept=".pdf,.doc,.docx" style="display:none" />
           </div>
 
           <!-- Sample resume button -->
           <div style="text-align:center;margin-top:1rem">
-            <button onclick="useSampleResume()" style="background:none;border:none;color:var(--accent-primary);font-size:0.88rem;cursor:pointer;text-decoration:underline">
+            <button type="button" onclick="useSampleResume()" style="background:none;border:none;color:var(--accent-primary);font-size:0.88rem;cursor:pointer;text-decoration:underline">
               ✨ Try with a sample resume
             </button>
           </div>
@@ -228,7 +228,7 @@
             </div>
             <div class="suggestion-item">
               <div class="sug-icon">☁️</div>
-              <div class="sug-text"><strong>Learn Docker & Kubernetes</strong> — 78% of senior SWE job postings require containerization skills.</div>
+              <div class="sug-text"><strong>Learn Docker &amp; Kubernetes</strong> — 78% of senior SWE job postings require containerization skills.</div>
             </div>
             <div class="suggestion-item">
               <div class="sug-icon">📝</div>
