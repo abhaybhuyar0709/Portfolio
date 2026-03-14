@@ -197,11 +197,12 @@ function initUploadZone() {
 function handleFileUpload(file) {
   const validTypes = ['application/pdf', 'application/msword',
     'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
-  if (!validTypes.includes(file.type)) {
+  // Allow plain objects (e.g. sample resume) that may not have a MIME type
+  if (file.type && !validTypes.includes(file.type)) {
     showToast('Please upload a PDF or Word document.', 'error');
     return;
   }
-  showUploadProgress(file.name);
+  showUploadProgress(file.name || 'Sample_Resume.pdf');
 }
 
 function showUploadProgress(fileName) {
