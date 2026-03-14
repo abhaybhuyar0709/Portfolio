@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Job Market Insights – ResumeAI</title>
+  <link rel="stylesheet" href="resumeai.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <style>
+    .charts-2col { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.75rem; }
+    .charts-3col { display: grid; grid-template-columns: repeat(3,1fr); gap: 1.5rem; margin-bottom: 1.75rem; }
+    .card { padding: 1.5rem; background: var(--bg-card); border: 1px solid var(--border-glass); border-radius: 16px; }
+
+    /* Trending skill */
+    .trend-item { display: flex; align-items: center; gap: 12px; margin-bottom: 0.9rem; }
+    .trend-item:last-child { margin-bottom: 0; }
+    .trend-rank { width: 24px; font-size: 0.78rem; font-weight: 700; color: var(--text-muted); flex-shrink: 0; }
+    .trend-name { flex: 1; font-size: 0.88rem; color: var(--text-primary); font-weight: 600; }
+    .trend-bar-col { width: 120px; }
+    .trend-pct { width: 38px; text-align: right; font-size: 0.8rem; font-weight: 700; color: var(--accent-cyan); }
+    .trend-delta { font-size: 0.72rem; color: var(--accent-green); font-weight: 700; }
+
+    /* Job role */
+    .role-card { padding: 1rem 1.25rem; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); border-radius: 12px; transition: all 0.3s; margin-bottom: 0.75rem; display: flex; align-items: center; gap: 12px; }
+    .role-card:hover { border-color: rgba(99,102,241,0.25); transform: translateX(4px); }
+    .role-card:last-child { margin-bottom: 0; }
+    .role-icon { font-size: 1.5rem; flex-shrink: 0; }
+    .role-info { flex: 1; }
+    .role-title { font-size: 0.9rem; font-weight: 700; color: var(--text-primary); }
+    .role-meta { font-size: 0.78rem; color: var(--text-muted); margin-top: 2px; display: flex; gap: 10px; flex-wrap: wrap; }
+    .role-demand { font-size: 0.78rem; font-weight: 700; }
+
+    /* Industry trend */
+    .industry-card { padding: 1.25rem; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); border-radius: 12px; transition: all 0.3s; text-align: center; }
+    .industry-card:hover { border-color: rgba(99,102,241,0.2); transform: translateY(-3px); }
+    .industry-icon { font-size: 2rem; margin-bottom: 0.5rem; }
+    .industry-name { font-size: 0.9rem; font-weight: 700; color: var(--text-primary); margin-bottom: 0.3rem; }
+    .industry-growth { font-size: 1.1rem; font-weight: 800; }
+
+    @media(max-width:900px) {
+      .charts-2col, .charts-3col { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+<div class="app-layout">
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+      <div class="brand-logo">🧠</div>
+      <div class="brand-text">ResumeAI</div>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-section-title">Main</div>
+      <a class="nav-item" href="dashboard.html"><span class="nav-icon">📊</span> Dashboard</a>
+      <a class="nav-item" href="upload.html"><span class="nav-icon">📄</span> Upload Resume</a>
+      <a class="nav-item" href="learning.html"><span class="nav-icon">🎓</span> Learning Paths</a>
+      <a class="nav-item active" href="insights.html"><span class="nav-icon">📈</span> Market Insights</a>
+      <div class="nav-section-title">Tools</div>
+      <a class="nav-item" href="recruiter.html"><span class="nav-icon">🏢</span> Recruiter Portal</a>
+      <a class="nav-item" href="resumeai.html"><span class="nav-icon">🏠</span> Home</a>
+    </nav>
+    <div class="sidebar-footer">
+      <div style="display:flex;align-items:center;gap:10px">
+        <div class="user-avatar-sm">AB</div>
+        <div>
+          <div style="font-size:0.85rem;font-weight:700;color:var(--text-primary)">Abhay Bhuyar</div>
+          <div style="font-size:0.74rem;color:var(--text-muted)">MCA Student</div>
+        </div>
+      </div>
+    </div>
+  </aside>
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+  <main class="main-content">
+    <div class="page-header">
+      <div>
+        <button class="hamburger" id="sidebarToggle"><span></span><span></span><span></span></button>
+        <h1 class="page-title">Job Market Insights</h1>
+        <p class="page-subtitle">Real-time data on trending skills, technologies, and industry demands</p>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px">
+        <span class="badge badge-green">● Live Data</span>
+        <select style="background:var(--bg-card);border:1px solid var(--border-glass);color:var(--text-secondary);padding:8px 14px;border-radius:10px;font-size:0.88rem;outline:none;cursor:pointer">
+          <option>Last 30 days</option>
+          <option>Last 90 days</option>
+          <option>Last 6 months</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="page-body">
+
+      <!-- Market Stats -->
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:1.25rem;margin-bottom:2rem">
+        <div class="stat-card purple">
+          <div class="stat-icon purple">💼</div>
+          <div class="stat-value" data-count="2.4" data-suffix="M">0</div>
+          <div class="stat-label">Open Tech Jobs</div>
+          <div class="stat-change up">↑ +8% this month</div>
+        </div>
+        <div class="stat-card cyan">
+          <div class="stat-icon cyan">📊</div>
+          <div class="stat-value" data-count="142" data-suffix="K">0</div>
+          <div class="stat-label">Avg. Salary (SWE)</div>
+          <div class="stat-change up">↑ +5% YoY</div>
+        </div>
+        <div class="stat-card green">
+          <div class="stat-icon green">🚀</div>
+          <div class="stat-value" data-count="340" data-suffix="%">0</div>
+          <div class="stat-label">AI Jobs Growth</div>
+          <div class="stat-change up">↑ vs 2023</div>
+        </div>
+        <div class="stat-card pink">
+          <div class="stat-icon pink">🏢</div>
+          <div class="stat-value" data-count="68" data-suffix="%">0</div>
+          <div class="stat-label">Remote Roles</div>
+          <div class="stat-change up">↑ +12% this year</div>
+        </div>
+      </div>
+
+      <!-- Charts Row 1 -->
+      <div class="charts-2col">
+        <!-- Jobs by Tech Bar Chart -->
+        <div class="card">
+          <div class="section-header">
+            <div class="section-title-sm">📊 Job Postings by Technology</div>
+            <span class="badge badge-purple">Top 8</span>
+          </div>
+          <div class="chart-container" style="height:260px">
+            <canvas id="techJobsChart"></canvas>
+          </div>
+        </div>
+
+        <!-- Salary Trend Line -->
+        <div class="card">
+          <div class="section-header">
+            <div class="section-title-sm">💰 Salary Trend (2020-2024)</div>
+            <span class="badge badge-cyan">SWE Roles</span>
+          </div>
+          <div class="chart-container" style="height:260px">
+            <canvas id="salaryTrendChart"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- Trending Skills + Popular Roles -->
+      <div class="charts-2col">
+        <!-- Trending Skills -->
+        <div class="card">
+          <div class="section-header">
+            <div class="section-title-sm">🔥 Trending Skills</div>
+            <span class="badge badge-orange">Hot right now</span>
+          </div>
+          <div>
+            <div class="trend-item">
+              <span class="trend-rank">#1</span>
+              <span class="trend-name">🤖 Generative AI / LLMs</span>
+              <div class="trend-bar-col progress-bar"><div class="progress-fill purple" data-width="96"></div></div>
+              <span class="trend-pct">96%</span>
+              <span class="trend-delta">+340%</span>
+            </div>
+            <div class="trend-item">
+              <span class="trend-rank">#2</span>
+              <span class="trend-name">☁️ AWS / Cloud</span>
+              <div class="trend-bar-col progress-bar"><div class="progress-fill cyan" data-width="89"></div></div>
+              <span class="trend-pct">89%</span>
+              <span class="trend-delta">+45%</span>
+            </div>
+            <div class="trend-item">
+              <span class="trend-rank">#3</span>
+              <span class="trend-name">🐳 Kubernetes</span>
+              <div class="trend-bar-col progress-bar"><div class="progress-fill green" data-width="82"></div></div>
+              <span class="trend-pct">82%</span>
+              <span class="trend-delta">+180%</span>
+            </div>
+            <div class="trend-item">
+              <span class="trend-rank">#4</span>
+              <span class="trend-name">⚛️ React.js</span>
+              <div class="trend-bar-col progress-bar"><div class="progress-fill orange" data-width="78"></div></div>
+              <span class="trend-pct">78%</span>
+              <span class="trend-delta">+22%</span>
+            </div>
+            <div class="trend-item">
+              <span class="trend-rank">#5</span>
+              <span class="trend-name">🐍 Python</span>
+              <div class="trend-bar-col progress-bar"><div class="progress-fill pink" data-width="75"></div></div>
+              <span class="trend-pct">75%</span>
+              <span class="trend-delta">+38%</span>
+            </div>
+            <div class="trend-item">
+              <span class="trend-rank">#6</span>
+              <span class="trend-name">📘 TypeScript</span>
+              <div class="trend-bar-col progress-bar"><div class="progress-fill purple" data-width="70"></div></div>
+              <span class="trend-pct">70%</span>
+              <span class="trend-delta">+65%</span>
+            </div>
+            <div class="trend-item">
+              <span class="trend-rank">#7</span>
+              <span class="trend-name">🔗 GraphQL</span>
+              <div class="trend-bar-col progress-bar"><div class="progress-fill cyan" data-width="62"></div></div>
+              <span class="trend-pct">62%</span>
+              <span class="trend-delta">+90%</span>
+            </div>
+            <div class="trend-item">
+              <span class="trend-rank">#8</span>
+              <span class="trend-name">🗃️ PostgreSQL</span>
+              <div class="trend-bar-col progress-bar"><div class="progress-fill green" data-width="58"></div></div>
+              <span class="trend-pct">58%</span>
+              <span class="trend-delta">+28%</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Popular Job Roles -->
+        <div class="card">
+          <div class="section-header">
+            <div class="section-title-sm">💼 In-Demand Job Roles</div>
+            <span class="badge badge-green">High demand</span>
+          </div>
+          <div>
+            <div class="role-card">
+              <div class="role-icon">🤖</div>
+              <div class="role-info">
+                <div class="role-title">AI/ML Engineer</div>
+                <div class="role-meta"><span>💰 $140K–$220K</span><span>📈 +340% YoY</span></div>
+              </div>
+              <span class="role-demand" style="color:#6ee7b7">🔥 Very Hot</span>
+            </div>
+            <div class="role-card">
+              <div class="role-icon">☁️</div>
+              <div class="role-info">
+                <div class="role-title">Cloud Architect</div>
+                <div class="role-meta"><span>💰 $160K–$230K</span><span>📈 +85% YoY</span></div>
+              </div>
+              <span class="role-demand" style="color:#6ee7b7">🔥 Very Hot</span>
+            </div>
+            <div class="role-card">
+              <div class="role-icon">⚙️</div>
+              <div class="role-info">
+                <div class="role-title">DevOps/SRE Engineer</div>
+                <div class="role-meta"><span>💰 $125K–$180K</span><span>📈 +65% YoY</span></div>
+              </div>
+              <span class="role-demand" style="color:#fcd34d">📈 Hot</span>
+            </div>
+            <div class="role-card">
+              <div class="role-icon">⚛️</div>
+              <div class="role-info">
+                <div class="role-title">Senior Full-Stack Dev</div>
+                <div class="role-meta"><span>💰 $110K–$160K</span><span>📈 +42% YoY</span></div>
+              </div>
+              <span class="role-demand" style="color:#fcd34d">📈 Hot</span>
+            </div>
+            <div class="role-card">
+              <div class="role-icon">🔒</div>
+              <div class="role-info">
+                <div class="role-title">Cybersecurity Engineer</div>
+                <div class="role-meta"><span>💰 $120K–$170K</span><span>📈 +55% YoY</span></div>
+              </div>
+              <span class="role-demand" style="color:#fcd34d">📈 Hot</span>
+            </div>
+            <div class="role-card">
+              <div class="role-icon">📊</div>
+              <div class="role-info">
+                <div class="role-title">Data Engineer</div>
+                <div class="role-meta"><span>💰 $115K–$165K</span><span>📈 +38% YoY</span></div>
+              </div>
+              <span class="role-demand" style="color:#a5b4fc">Rising</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Industry Trends -->
+      <div class="card" style="margin-bottom:1.5rem">
+        <div class="section-header">
+          <div class="section-title-sm">🏭 Industry Trends & Growth</div>
+          <span class="badge badge-purple">2024 Data</span>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:1rem">
+          <div class="industry-card">
+            <div class="industry-icon">🤖</div>
+            <div class="industry-name">AI & ML</div>
+            <div class="industry-growth" style="color:#6ee7b7">+340%</div>
+            <div style="font-size:0.72rem;color:var(--text-muted);margin-top:2px">YoY Growth</div>
+          </div>
+          <div class="industry-card">
+            <div class="industry-icon">☁️</div>
+            <div class="industry-name">Cloud</div>
+            <div class="industry-growth" style="color:#67e8f9">+85%</div>
+            <div style="font-size:0.72rem;color:var(--text-muted);margin-top:2px">YoY Growth</div>
+          </div>
+          <div class="industry-card">
+            <div class="industry-icon">🔒</div>
+            <div class="industry-name">Cybersec</div>
+            <div class="industry-growth" style="color:#fcd34d">+55%</div>
+            <div style="font-size:0.72rem;color:var(--text-muted);margin-top:2px">YoY Growth</div>
+          </div>
+          <div class="industry-card">
+            <div class="industry-icon">📱</div>
+            <div class="industry-name">Mobile</div>
+            <div class="industry-growth" style="color:#f9a8d4">+28%</div>
+            <div style="font-size:0.72rem;color:var(--text-muted);margin-top:2px">YoY Growth</div>
+          </div>
+          <div class="industry-card">
+            <div class="industry-icon">🌐</div>
+            <div class="industry-name">Web3</div>
+            <div class="industry-growth" style="color:#fca5a5">-15%</div>
+            <div style="font-size:0.72rem;color:var(--text-muted);margin-top:2px">YoY Growth</div>
+          </div>
+          <div class="industry-card">
+            <div class="industry-icon">🏥</div>
+            <div class="industry-name">HealthTech</div>
+            <div class="industry-growth" style="color:#6ee7b7">+62%</div>
+            <div style="font-size:0.72rem;color:var(--text-muted);margin-top:2px">YoY Growth</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Skills Demand Doughnut -->
+      <div style="display:grid;grid-template-columns:1fr 2fr;gap:1.5rem">
+        <div class="card">
+          <div class="section-header">
+            <div class="section-title-sm">🗂️ Skills by Category</div>
+          </div>
+          <div class="chart-container" style="height:220px">
+            <canvas id="categoryPieChart"></canvas>
+          </div>
+        </div>
+        <div class="card">
+          <div class="section-header">
+            <div class="section-title-sm">📈 Monthly Job Postings Trend</div>
+            <span class="badge badge-cyan">Last 12 months</span>
+          </div>
+          <div class="chart-container" style="height:220px">
+            <canvas id="jobTrendChart"></canvas>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<script src="resumeai.js"></script>
+<script>
+const chartDefaults = {
+  grid: { color: 'rgba(255,255,255,0.05)' },
+  ticks: { color: '#64748b', font: { size: 11 } },
+  legend: { color: '#94a3b8', font: { size: 11 } }
+};
+
+document.addEventListener('DOMContentLoaded', () => {
+  initSidebar();
+  initAnimatedNumbers();
+  initProgressBars();
+
+  // Tech Jobs Bar Chart
+  const techCtx = document.getElementById('techJobsChart');
+  if (techCtx) {
+    new Chart(techCtx, {
+      type: 'bar',
+      data: {
+        labels: ['Python', 'JavaScript', 'AWS', 'React', 'Kubernetes', 'TypeScript', 'Go', 'Rust'],
+        datasets: [{
+          label: 'Job Postings (thousands)',
+          data: [380, 340, 290, 250, 180, 165, 120, 85],
+          backgroundColor: [
+            'rgba(99,102,241,0.7)', 'rgba(6,182,212,0.7)', 'rgba(16,185,129,0.7)',
+            'rgba(245,158,11,0.7)', 'rgba(236,72,153,0.7)', 'rgba(139,92,246,0.7)',
+            'rgba(20,184,166,0.7)', 'rgba(239,68,68,0.7)'
+          ],
+          borderColor: ['#6366f1','#06b6d4','#10b981','#f59e0b','#ec4899','#8b5cf6','#14b8a6','#ef4444'],
+          borderWidth: 2,
+          borderRadius: 6
+        }]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+          x: { grid: chartDefaults.grid, ticks: chartDefaults.ticks },
+          y: { grid: chartDefaults.grid, ticks: chartDefaults.ticks }
+        }
+      }
+    });
+  }
+
+  // Salary Trend
+  const salaryCtx = document.getElementById('salaryTrendChart');
+  if (salaryCtx) {
+    new Chart(salaryCtx, {
+      type: 'line',
+      data: {
+        labels: ['2020', '2021', '2022', '2023', '2024'],
+        datasets: [
+          {
+            label: 'Junior SWE',
+            data: [72, 78, 88, 94, 102],
+            borderColor: '#6366f1', backgroundColor: 'rgba(99,102,241,0.1)',
+            tension: 0.4, fill: true, pointRadius: 4
+          },
+          {
+            label: 'Senior SWE',
+            data: [120, 130, 145, 158, 172],
+            borderColor: '#10b981', backgroundColor: 'rgba(16,185,129,0.05)',
+            tension: 0.4, fill: false, pointRadius: 4
+          }
+        ]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { labels: { color: '#94a3b8', font: { size: 11 } } } },
+        scales: {
+          x: { grid: chartDefaults.grid, ticks: chartDefaults.ticks },
+          y: { grid: chartDefaults.grid, ticks: { ...chartDefaults.ticks, callback: (v) => '$' + v + 'K' } }
+        }
+      }
+    });
+  }
+
+  // Category Pie
+  const pieCtx = document.getElementById('categoryPieChart');
+  if (pieCtx) {
+    new Chart(pieCtx, {
+      type: 'doughnut',
+      data: {
+        labels: ['Cloud', 'Frontend', 'Backend', 'ML/AI', 'DevOps', 'Other'],
+        datasets: [{
+          data: [28, 22, 20, 18, 8, 4],
+          backgroundColor: ['#6366f1','#06b6d4','#10b981','#f59e0b','#ec4899','#64748b'],
+          borderColor: 'transparent',
+          borderWidth: 0
+        }]
+      },
+      options: {
+        cutout: '65%',
+        plugins: { legend: { position: 'bottom', labels: { color: '#94a3b8', font: { size: 10 }, padding: 10 } } },
+        responsive: true, maintainAspectRatio: false
+      }
+    });
+  }
+
+  // Job Trend Line
+  const trendCtx = document.getElementById('jobTrendChart');
+  if (trendCtx) {
+    new Chart(trendCtx, {
+      type: 'line',
+      data: {
+        labels: ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'],
+        datasets: [{
+          label: 'Job Postings (K)',
+          data: [180, 195, 210, 225, 240, 255, 262, 278, 290, 305, 318, 340],
+          borderColor: '#6366f1',
+          backgroundColor: (ctx) => {
+            const g = ctx.chart.ctx.createLinearGradient(0, 0, 0, 200);
+            g.addColorStop(0, 'rgba(99,102,241,0.25)');
+            g.addColorStop(1, 'rgba(99,102,241,0)');
+            return g;
+          },
+          tension: 0.4, fill: true, pointRadius: 3, pointBackgroundColor: '#6366f1'
+        }]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+          x: { grid: chartDefaults.grid, ticks: chartDefaults.ticks },
+          y: { grid: chartDefaults.grid, ticks: chartDefaults.ticks }
+        }
+      }
+    });
+  }
+});
+</script>
+</body>
+</html>

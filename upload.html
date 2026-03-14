@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Upload Resume – ResumeAI</title>
+  <link rel="stylesheet" href="resumeai.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <style>
+    .upload-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; align-items: start; }
+    .analysis-panel { display: flex; flex-direction: column; gap: 1.25rem; }
+    .result-card { padding: 1.25rem; background: var(--bg-card); border: 1px solid var(--border-glass); border-radius: 14px; }
+
+    /* Score display */
+    .score-display { display: flex; align-items: center; gap: 2rem; flex-wrap: wrap; }
+    .big-score { font-size: 4rem; font-weight: 900; background: linear-gradient(135deg,#818cf8,#c084fc); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; line-height:1; }
+    .score-desc { font-size: 0.9rem; color: var(--text-secondary); line-height: 1.6; }
+    .score-grade { display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; border-radius: 20px; background: rgba(16,185,129,0.15); color: #6ee7b7; border: 1px solid rgba(16,185,129,0.25); font-weight: 700; font-size: 0.9rem; margin-top: 0.5rem; }
+
+    /* Skill items */
+    .skill-item { display: flex; align-items: center; gap: 10px; margin-bottom: 0.75rem; }
+    .skill-item:last-child { margin-bottom: 0; }
+    .skill-name-col { flex: 1; font-size: 0.88rem; color: var(--text-secondary); }
+    .skill-bar-col { flex: 2; }
+    .skill-pct-col { width: 40px; text-align: right; font-size: 0.82rem; font-weight: 700; color: var(--accent-primary); }
+
+    /* Suggestion */
+    .suggestion-item { display: flex; gap: 10px; padding: 0.75rem; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); border-radius: 10px; margin-bottom: 0.75rem; }
+    .suggestion-item:last-child { margin-bottom: 0; }
+    .sug-icon { font-size: 1.1rem; flex-shrink: 0; }
+    .sug-text { font-size: 0.85rem; color: var(--text-secondary); line-height: 1.5; }
+    .sug-text strong { color: var(--text-primary); }
+
+    @media(max-width:900px) {
+      .upload-layout { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+<div class="app-layout">
+
+  <!-- Sidebar -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+      <div class="brand-logo">🧠</div>
+      <div class="brand-text">ResumeAI</div>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-section-title">Main</div>
+      <a class="nav-item" href="dashboard.html"><span class="nav-icon">📊</span> Dashboard</a>
+      <a class="nav-item active" href="upload.html"><span class="nav-icon">📄</span> Upload Resume</a>
+      <a class="nav-item" href="learning.html"><span class="nav-icon">🎓</span> Learning Paths</a>
+      <a class="nav-item" href="insights.html"><span class="nav-icon">📈</span> Market Insights</a>
+      <div class="nav-section-title">Tools</div>
+      <a class="nav-item" href="recruiter.html"><span class="nav-icon">🏢</span> Recruiter Portal</a>
+      <a class="nav-item" href="resumeai.html"><span class="nav-icon">🏠</span> Home</a>
+    </nav>
+    <div class="sidebar-footer">
+      <div style="display:flex;align-items:center;gap:10px">
+        <div class="user-avatar-sm">AB</div>
+        <div>
+          <div style="font-size:0.85rem;font-weight:700;color:var(--text-primary)">Abhay Bhuyar</div>
+          <div style="font-size:0.74rem;color:var(--text-muted)">MCA Student</div>
+        </div>
+      </div>
+    </div>
+  </aside>
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+  <!-- Main -->
+  <main class="main-content">
+    <div class="page-header">
+      <div>
+        <button class="hamburger" id="sidebarToggle"><span></span><span></span><span></span></button>
+        <h1 class="page-title">Upload Resume</h1>
+        <p class="page-subtitle">Drag & drop your resume for instant AI analysis</p>
+      </div>
+      <div style="display:flex;gap:10px">
+        <select style="background:var(--bg-card);border:1px solid var(--border-glass);color:var(--text-secondary);padding:8px 14px;border-radius:10px;font-size:0.88rem;outline:none;cursor:pointer">
+          <option>Target: Software Engineer</option>
+          <option>Target: Data Scientist</option>
+          <option>Target: DevOps Engineer</option>
+          <option>Target: Product Manager</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="page-body">
+      <div class="upload-layout">
+
+        <!-- Upload Column -->
+        <div>
+          <!-- Drop Zone -->
+          <div class="upload-zone" id="uploadZone">
+            <span class="upload-icon">☁️</span>
+            <h3 style="font-size:1.2rem;font-weight:700;color:var(--text-primary);margin-bottom:0.5rem">Drop your resume here</h3>
+            <p style="font-size:0.88rem;color:var(--text-muted);margin-bottom:1.5rem">Supports PDF, DOC, DOCX — max 10MB</p>
+            <button class="btn btn-primary">Browse Files</button>
+            <input type="file" id="resumeFile" accept=".pdf,.doc,.docx" style="display:none" />
+          </div>
+
+          <!-- Sample resume button -->
+          <div style="text-align:center;margin-top:1rem">
+            <button onclick="useSampleResume()" style="background:none;border:none;color:var(--accent-primary);font-size:0.88rem;cursor:pointer;text-decoration:underline">
+              ✨ Try with a sample resume
+            </button>
+          </div>
+
+          <!-- Tips Card -->
+          <div style="margin-top:1.5rem;padding:1.25rem;background:rgba(99,102,241,0.06);border:1px solid rgba(99,102,241,0.15);border-radius:14px">
+            <div style="font-size:0.88rem;font-weight:700;color:#a5b4fc;margin-bottom:0.75rem">💡 Tips for best results</div>
+            <ul style="list-style:none;display:flex;flex-direction:column;gap:0.5rem">
+              <li style="font-size:0.82rem;color:var(--text-muted);display:flex;gap:6px"><span>•</span>Use a PDF for most accurate parsing</li>
+              <li style="font-size:0.82rem;color:var(--text-muted);display:flex;gap:6px"><span>•</span>Include quantifiable achievements</li>
+              <li style="font-size:0.82rem;color:var(--text-muted);display:flex;gap:6px"><span>•</span>List technical skills explicitly</li>
+              <li style="font-size:0.82rem;color:var(--text-muted);display:flex;gap:6px"><span>•</span>Mention years of experience per skill</li>
+            </ul>
+          </div>
+
+          <!-- Previous Analyses -->
+          <div style="margin-top:1.5rem">
+            <div class="section-header">
+              <div class="section-title-sm">📋 Previous Analyses</div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:0.75rem">
+              <div style="display:flex;align-items:center;gap:12px;padding:0.9rem;background:var(--bg-card);border:1px solid var(--border-glass);border-radius:12px">
+                <span style="font-size:1.5rem">📄</span>
+                <div style="flex:1">
+                  <div style="font-size:0.88rem;font-weight:600;color:var(--text-primary)">Resume_v3.pdf</div>
+                  <div style="font-size:0.75rem;color:var(--text-muted)">Analyzed 2 days ago</div>
+                </div>
+                <span class="badge badge-green">87/100</span>
+              </div>
+              <div style="display:flex;align-items:center;gap:12px;padding:0.9rem;background:var(--bg-card);border:1px solid var(--border-glass);border-radius:12px">
+                <span style="font-size:1.5rem">📄</span>
+                <div style="flex:1">
+                  <div style="font-size:0.88rem;font-weight:600;color:var(--text-primary)">Resume_v2.pdf</div>
+                  <div style="font-size:0.75rem;color:var(--text-muted)">Analyzed 2 weeks ago</div>
+                </div>
+                <span class="badge badge-orange">75/100</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Analysis Results -->
+        <div class="analysis-panel" id="analysisResults" style="display:none">
+
+          <!-- Overall Score -->
+          <div class="result-card">
+            <div class="section-header">
+              <div class="section-title-sm">⭐ Overall Resume Score</div>
+              <span class="badge badge-green">Excellent</span>
+            </div>
+            <div class="score-display">
+              <div>
+                <div class="big-score">87</div>
+                <div class="score-grade">✅ ATS Friendly</div>
+              </div>
+              <div class="score-desc">
+                Your resume scores well overall. Strong technical skills and relevant experience.<br/>
+                <strong style="color:var(--text-primary)">3 areas</strong> need improvement to reach 95+.
+              </div>
+            </div>
+          </div>
+
+          <!-- Skill Match -->
+          <div class="result-card">
+            <div class="section-header">
+              <div class="section-title-sm">🎯 Skill Match — Software Engineer</div>
+              <span style="font-size:1.1rem;font-weight:800;color:#6ee7b7">76%</span>
+            </div>
+            <div class="skill-item">
+              <span class="skill-name-col">React.js</span>
+              <div class="skill-bar-col progress-bar"><div class="progress-fill purple" data-width="94"></div></div>
+              <span class="skill-pct-col">94%</span>
+            </div>
+            <div class="skill-item">
+              <span class="skill-name-col">Java</span>
+              <div class="skill-bar-col progress-bar"><div class="progress-fill cyan" data-width="88"></div></div>
+              <span class="skill-pct-col">88%</span>
+            </div>
+            <div class="skill-item">
+              <span class="skill-name-col">Node.js</span>
+              <div class="skill-bar-col progress-bar"><div class="progress-fill green" data-width="78"></div></div>
+              <span class="skill-pct-col">78%</span>
+            </div>
+            <div class="skill-item">
+              <span class="skill-name-col">Python</span>
+              <div class="skill-bar-col progress-bar"><div class="progress-fill orange" data-width="65"></div></div>
+              <span class="skill-pct-col">65%</span>
+            </div>
+          </div>
+
+          <!-- Missing Skills -->
+          <div class="result-card">
+            <div class="section-header">
+              <div class="section-title-sm">⚠️ Missing Skills</div>
+              <span class="badge badge-pink">8 gaps found</span>
+            </div>
+            <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:1rem">
+              <span class="skill-chip missing">Docker</span>
+              <span class="skill-chip missing">Kubernetes</span>
+              <span class="skill-chip missing">AWS</span>
+              <span class="skill-chip missing">GraphQL</span>
+              <span class="skill-chip missing">TypeScript</span>
+              <span class="skill-chip missing">Redis</span>
+              <span class="skill-chip missing">Kafka</span>
+              <span class="skill-chip missing">CI/CD</span>
+            </div>
+            <div style="display:flex;flex-wrap:wrap;gap:8px">
+              <div style="font-size:0.78rem;color:var(--text-muted);width:100%;margin-bottom:4px">Skills you have ✅</div>
+              <span class="skill-chip match">React</span>
+              <span class="skill-chip match">Java</span>
+              <span class="skill-chip match">Node.js</span>
+              <span class="skill-chip match">MongoDB</span>
+              <span class="skill-chip match">MySQL</span>
+              <span class="skill-chip match">Git</span>
+            </div>
+          </div>
+
+          <!-- AI Suggestions -->
+          <div class="result-card">
+            <div class="section-title-sm" style="margin-bottom:1rem">🤖 AI Improvement Suggestions</div>
+            <div class="suggestion-item">
+              <div class="sug-icon">🔧</div>
+              <div class="sug-text"><strong>Add quantifiable achievements</strong> — e.g., "Reduced load time by 40%" instead of "Improved performance".</div>
+            </div>
+            <div class="suggestion-item">
+              <div class="sug-icon">☁️</div>
+              <div class="sug-text"><strong>Learn Docker & Kubernetes</strong> — 78% of senior SWE job postings require containerization skills.</div>
+            </div>
+            <div class="suggestion-item">
+              <div class="sug-icon">📝</div>
+              <div class="sug-text"><strong>Improve summary section</strong> — Add a 3-line professional summary tailored to Software Engineering roles.</div>
+            </div>
+            <div class="suggestion-item">
+              <div class="sug-icon">🎓</div>
+              <div class="sug-text"><strong>Add AWS certification</strong> — Candidates with AWS certs get 2.3× more interview callbacks.</div>
+            </div>
+          </div>
+
+          <!-- CTA -->
+          <div style="display:flex;gap:1rem;flex-wrap:wrap">
+            <a href="learning.html" class="btn btn-primary" style="flex:1;justify-content:center">🎓 View Learning Plan</a>
+            <a href="dashboard.html" class="btn btn-secondary" style="flex:1;justify-content:center">📊 Dashboard</a>
+          </div>
+        </div>
+
+        <!-- Placeholder when no analysis -->
+        <div id="noAnalysisPlaceholder" style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:4rem 2rem;text-align:center;background:var(--bg-card);border:1px dashed var(--border-glass);border-radius:16px">
+          <div style="font-size:4rem;margin-bottom:1rem">🔍</div>
+          <h3 style="font-size:1.1rem;font-weight:700;color:var(--text-primary);margin-bottom:0.5rem">Your Analysis Will Appear Here</h3>
+          <p style="font-size:0.88rem;color:var(--text-muted)">Upload your resume to get instant AI-powered insights.</p>
+        </div>
+
+      </div>
+    </div>
+  </main>
+</div>
+
+<script src="resumeai.js"></script>
+<script>
+function useSampleResume() {
+  handleFileUpload({ name: 'Sample_Resume.pdf', type: 'application/pdf', size: 102400 });
+}
+
+function handleFileUpload(file) {
+  const validTypes = ['application/pdf', 'application/msword',
+    'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
+  const fileName = file.name || 'Sample_Resume.pdf';
+
+  const zone = document.getElementById('uploadZone');
+  const placeholder = document.getElementById('noAnalysisPlaceholder');
+
+  zone.innerHTML = `
+    <div style="text-align:center">
+      <div style="font-size:2.5rem;margin-bottom:1rem">📄</div>
+      <p style="color:var(--text-primary);font-weight:700;margin-bottom:0.5rem">${fileName}</p>
+      <p style="color:var(--text-secondary);font-size:0.85rem;margin-bottom:1.5rem">Analyzing with AI...</p>
+      <div class="progress-bar" style="max-width:280px;margin:0 auto;height:8px">
+        <div class="progress-fill purple" id="uploadProgress" style="width:0%;transition:width 0.4s ease"></div>
+      </div>
+      <p style="color:var(--text-muted);font-size:0.8rem;margin-top:0.75rem" id="uploadStatus">Uploading...</p>
+    </div>
+  `;
+
+  const steps = ['Uploading...', 'Parsing document...', 'Extracting skills...', 'Running AI analysis...', 'Generating report...'];
+  let progress = 0, stepIdx = 0;
+
+  const interval = setInterval(() => {
+    progress += Math.random() * 16 + 8;
+    if (progress >= 100) {
+      progress = 100;
+      clearInterval(interval);
+      setTimeout(() => {
+        const results = document.getElementById('analysisResults');
+        if (placeholder) placeholder.style.display = 'none';
+        if (results) {
+          results.style.display = 'flex';
+          results.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          initProgressBars();
+        }
+      }, 500);
+    }
+    const bar = document.getElementById('uploadProgress');
+    const status = document.getElementById('uploadStatus');
+    if (bar) bar.style.width = progress + '%';
+    if (status && steps[stepIdx]) { status.textContent = steps[stepIdx]; stepIdx = Math.min(stepIdx + 1, steps.length - 1); }
+  }, 380);
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  initSidebar();
+  initProgressBars();
+
+  const zone = document.getElementById('uploadZone');
+  const fileInput = document.getElementById('resumeFile');
+
+  if (zone && fileInput) {
+    zone.addEventListener('click', () => fileInput.click());
+    zone.addEventListener('dragover', (e) => { e.preventDefault(); zone.classList.add('drag-over'); });
+    zone.addEventListener('dragleave', () => zone.classList.remove('drag-over'));
+    zone.addEventListener('drop', (e) => {
+      e.preventDefault();
+      zone.classList.remove('drag-over');
+      const file = e.dataTransfer.files[0];
+      if (file) handleFileUpload(file);
+    });
+    fileInput.addEventListener('change', (e) => {
+      if (e.target.files[0]) handleFileUpload(e.target.files[0]);
+    });
+  }
+});
+</script>
+</body>
+</html>

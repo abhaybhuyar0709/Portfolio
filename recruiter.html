@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Recruiter Portal – ResumeAI</title>
+  <link rel="stylesheet" href="resumeai.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <style>
+    .portal-header { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem; margin-bottom: 1.75rem; }
+    .filters-row { display: flex; gap: 0.75rem; flex-wrap: wrap; margin-bottom: 1.5rem; align-items: center; }
+    .filter-select { background: var(--bg-card); border: 1px solid var(--border-glass); color: var(--text-secondary); padding: 8px 14px; border-radius: 10px; font-size: 0.85rem; outline: none; cursor: pointer; }
+
+    /* Candidate card */
+    .candidates-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.25rem; margin-bottom: 2rem; }
+    .cand-card { padding: 1.25rem; background: var(--bg-card); border: 1px solid var(--border-glass); border-radius: 16px; transition: all 0.3s; }
+    .cand-card:hover { border-color: rgba(99,102,241,0.3); box-shadow: 0 10px 40px rgba(0,0,0,0.3); transform: translateY(-2px); }
+
+    .cand-top { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 1rem; }
+    .cand-avatar { width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; font-weight: 800; color: white; flex-shrink: 0; }
+    .cand-name { font-size: 0.95rem; font-weight: 700; color: var(--text-primary); }
+    .cand-role { font-size: 0.78rem; color: var(--text-muted); margin-top: 2px; }
+    .cand-location { font-size: 0.75rem; color: var(--text-muted); margin-top: 2px; }
+
+    .cand-score-row { display: flex; gap: 0.75rem; margin-bottom: 0.9rem; }
+    .score-pill { flex: 1; padding: 0.5rem; border-radius: 10px; text-align: center; }
+    .score-pill .pill-val { font-size: 1rem; font-weight: 800; }
+    .score-pill .pill-lbl { font-size: 0.65rem; color: var(--text-muted); margin-top: 1px; }
+
+    .cand-skills { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 0.9rem; }
+    .cand-skill { padding: 3px 8px; border-radius: 10px; font-size: 0.72rem; font-weight: 600; background: rgba(99,102,241,0.1); color: #a5b4fc; border: 1px solid rgba(99,102,241,0.18); }
+
+    .cand-actions { display: flex; gap: 8px; }
+    .cand-actions button { flex: 1; padding: 7px; border-radius: 9px; font-size: 0.8rem; font-weight: 600; cursor: pointer; transition: all 0.2s; border: none; }
+    .btn-view { background: rgba(99,102,241,0.15); color: #a5b4fc; }
+    .btn-view:hover { background: rgba(99,102,241,0.25); }
+    .btn-test { background: rgba(16,185,129,0.15); color: #6ee7b7; }
+    .btn-test:hover { background: rgba(16,185,129,0.25); }
+    .btn-contact { background: rgba(6,182,212,0.15); color: #67e8f9; }
+    .btn-contact:hover { background: rgba(6,182,212,0.25); }
+
+    /* Tests Panel */
+    .test-card { padding: 1.25rem; background: var(--bg-card); border: 1px solid var(--border-glass); border-radius: 14px; margin-bottom: 0.9rem; display: flex; align-items: center; gap: 12px; }
+    .test-icon { width: 44px; height: 44px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; flex-shrink: 0; }
+    .test-name { font-size: 0.9rem; font-weight: 700; color: var(--text-primary); }
+    .test-meta { font-size: 0.78rem; color: var(--text-muted); display: flex; gap: 10px; margin-top: 2px; }
+    .test-card .btn-assign { margin-left: auto; padding: 6px 14px; border-radius: 8px; font-size: 0.78rem; font-weight: 700; cursor: pointer; background: rgba(99,102,241,0.15); color: #a5b4fc; border: 1px solid rgba(99,102,241,0.25); transition: all 0.2s; }
+    .test-card .btn-assign:hover { background: rgba(99,102,241,0.25); }
+
+    /* Tabs */
+    .portal-tabs { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 1.5rem; border-bottom: 1px solid var(--border-glass); padding-bottom: 0.75rem; }
+    .portal-tab { padding: 8px 20px; border-radius: 8px 8px 0 0; font-size: 0.88rem; font-weight: 600; cursor: pointer; background: transparent; border: none; color: var(--text-muted); transition: all 0.2s; }
+    .portal-tab.active { color: #a5b4fc; background: rgba(99,102,241,0.1); }
+    .portal-tab:hover { color: var(--text-primary); }
+
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+  </style>
+</head>
+<body>
+<div class="app-layout">
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+      <div class="brand-logo">🧠</div>
+      <div class="brand-text">ResumeAI</div>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-section-title">Main</div>
+      <a class="nav-item" href="dashboard.html"><span class="nav-icon">📊</span> Dashboard</a>
+      <a class="nav-item" href="upload.html"><span class="nav-icon">📄</span> Upload Resume</a>
+      <a class="nav-item" href="learning.html"><span class="nav-icon">🎓</span> Learning Paths</a>
+      <a class="nav-item" href="insights.html"><span class="nav-icon">📈</span> Market Insights</a>
+      <div class="nav-section-title">Tools</div>
+      <a class="nav-item active" href="recruiter.html"><span class="nav-icon">🏢</span> Recruiter Portal</a>
+      <a class="nav-item" href="resumeai.html"><span class="nav-icon">🏠</span> Home</a>
+    </nav>
+    <div class="sidebar-footer">
+      <div style="display:flex;align-items:center;gap:10px">
+        <div class="user-avatar-sm" style="background:linear-gradient(135deg,#06b6d4,#3b82f6)">HR</div>
+        <div>
+          <div style="font-size:0.85rem;font-weight:700;color:var(--text-primary)">HR Manager</div>
+          <div style="font-size:0.74rem;color:var(--text-muted)">Recruiter Account</div>
+        </div>
+      </div>
+    </div>
+  </aside>
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+  <main class="main-content">
+    <div class="page-header">
+      <div>
+        <button class="hamburger" id="sidebarToggle"><span></span><span></span><span></span></button>
+        <h1 class="page-title">Recruiter Portal</h1>
+        <p class="page-subtitle">Search candidates, view skill scores, and assign skill tests</p>
+      </div>
+      <div style="display:flex;gap:10px;align-items:center">
+        <span class="badge badge-purple">🏢 Premium Account</span>
+        <button class="btn btn-primary btn-sm">+ Post a Role</button>
+      </div>
+    </div>
+
+    <div class="page-body">
+
+      <!-- Recruiter Stats -->
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:1.25rem;margin-bottom:2rem">
+        <div class="stat-card purple">
+          <div class="stat-icon purple">👥</div>
+          <div class="stat-value" data-count="1842" data-suffix="">0</div>
+          <div class="stat-label">Candidates in Pool</div>
+        </div>
+        <div class="stat-card green">
+          <div class="stat-icon green">✅</div>
+          <div class="stat-value" data-count="47" data-suffix="">0</div>
+          <div class="stat-label">Shortlisted</div>
+        </div>
+        <div class="stat-card cyan">
+          <div class="stat-icon cyan">📝</div>
+          <div class="stat-value" data-count="23" data-suffix="">0</div>
+          <div class="stat-label">Tests Assigned</div>
+        </div>
+        <div class="stat-card pink">
+          <div class="stat-icon pink">🤝</div>
+          <div class="stat-value" data-count="12" data-suffix="">0</div>
+          <div class="stat-label">Offers Extended</div>
+        </div>
+      </div>
+
+      <!-- Search & Filters -->
+      <div id="search" style="padding:1.25rem;background:var(--bg-card);border:1px solid var(--border-glass);border-radius:16px;margin-bottom:1.5rem">
+        <div style="margin-bottom:1rem">
+          <div class="search-bar">
+            <span style="font-size:1.1rem">🔍</span>
+            <input type="text" id="candidateSearch" placeholder="Search by name, skills, or role..." style="font-size:0.95rem" />
+          </div>
+        </div>
+        <div class="filters-row">
+          <select class="filter-select">
+            <option>All Roles</option>
+            <option>Software Engineer</option>
+            <option>Data Scientist</option>
+            <option>DevOps Engineer</option>
+            <option>ML Engineer</option>
+            <option>Product Manager</option>
+          </select>
+          <select class="filter-select">
+            <option>All Experience</option>
+            <option>0-1 years</option>
+            <option>1-3 years</option>
+            <option>3-5 years</option>
+            <option>5+ years</option>
+          </select>
+          <select class="filter-select">
+            <option>Any Score</option>
+            <option>90+ (Excellent)</option>
+            <option>80+ (Strong)</option>
+            <option>70+ (Good)</option>
+          </select>
+          <select class="filter-select">
+            <option>All Locations</option>
+            <option>Remote</option>
+            <option>Mumbai</option>
+            <option>Bangalore</option>
+            <option>Hyderabad</option>
+          </select>
+          <button class="btn btn-primary btn-sm">Search →</button>
+        </div>
+      </div>
+
+      <!-- Tabs -->
+      <div class="portal-tabs">
+        <button class="portal-tab active" onclick="switchTab(this,'candidates')">👥 Candidates (24)</button>
+        <button class="portal-tab" onclick="switchTab(this,'shortlisted')">⭐ Shortlisted (8)</button>
+        <button class="portal-tab" onclick="switchTab(this,'tests')" id="tests">📝 Skill Tests</button>
+        <button class="portal-tab" onclick="switchTab(this,'analytics')">📊 Analytics</button>
+      </div>
+
+      <!-- Candidates Tab -->
+      <div class="tab-content active" id="tab-candidates">
+        <div class="candidates-grid">
+
+          <!-- Candidate 1 -->
+          <div class="cand-card" data-name="Arjun Mehta">
+            <div class="cand-top">
+              <div class="cand-avatar" style="background:linear-gradient(135deg,#6366f1,#8b5cf6)">AM</div>
+              <div style="flex:1">
+                <div class="cand-name candidate-name">Arjun Mehta</div>
+                <div class="cand-role candidate-role">Full-Stack Developer</div>
+                <div class="cand-location">📍 Bangalore · Remote OK</div>
+              </div>
+              <span class="badge badge-green">Open</span>
+            </div>
+            <div class="cand-score-row">
+              <div class="score-pill" style="background:rgba(99,102,241,0.1)">
+                <div class="pill-val" style="color:#a5b4fc">94</div>
+                <div class="pill-lbl">Resume Score</div>
+              </div>
+              <div class="score-pill" style="background:rgba(16,185,129,0.1)">
+                <div class="pill-val" style="color:#6ee7b7">88%</div>
+                <div class="pill-lbl">Job Fit</div>
+              </div>
+              <div class="score-pill" style="background:rgba(6,182,212,0.1)">
+                <div class="pill-val" style="color:#67e8f9">4y</div>
+                <div class="pill-lbl">Experience</div>
+              </div>
+            </div>
+            <div class="cand-skills">
+              <span class="cand-skill">React</span><span class="cand-skill">Node.js</span>
+              <span class="cand-skill">AWS</span><span class="cand-skill">MongoDB</span><span class="cand-skill">TypeScript</span>
+            </div>
+            <div class="cand-actions">
+              <button class="btn-view" onclick="viewProfile('Arjun Mehta')">👁️ View</button>
+              <button class="btn-test" onclick="assignTest('Arjun Mehta')">📝 Test</button>
+              <button class="btn-contact" onclick="contactCandidate('Arjun Mehta')">✉️ Contact</button>
+            </div>
+          </div>
+
+          <!-- Candidate 2 -->
+          <div class="cand-card" data-name="Priya Sharma">
+            <div class="cand-top">
+              <div class="cand-avatar" style="background:linear-gradient(135deg,#ec4899,#f43f5e)">PS</div>
+              <div style="flex:1">
+                <div class="cand-name candidate-name">Priya Sharma</div>
+                <div class="cand-role candidate-role">Data Scientist</div>
+                <div class="cand-location">📍 Mumbai · Hybrid</div>
+              </div>
+              <span class="badge badge-green">Open</span>
+            </div>
+            <div class="cand-score-row">
+              <div class="score-pill" style="background:rgba(99,102,241,0.1)">
+                <div class="pill-val" style="color:#a5b4fc">91</div>
+                <div class="pill-lbl">Resume Score</div>
+              </div>
+              <div class="score-pill" style="background:rgba(16,185,129,0.1)">
+                <div class="pill-val" style="color:#6ee7b7">92%</div>
+                <div class="pill-lbl">Job Fit</div>
+              </div>
+              <div class="score-pill" style="background:rgba(6,182,212,0.1)">
+                <div class="pill-val" style="color:#67e8f9">3y</div>
+                <div class="pill-lbl">Experience</div>
+              </div>
+            </div>
+            <div class="cand-skills">
+              <span class="cand-skill">Python</span><span class="cand-skill">TensorFlow</span>
+              <span class="cand-skill">Pandas</span><span class="cand-skill">SQL</span><span class="cand-skill">Tableau</span>
+            </div>
+            <div class="cand-actions">
+              <button class="btn-view" onclick="viewProfile('Priya Sharma')">👁️ View</button>
+              <button class="btn-test" onclick="assignTest('Priya Sharma')">📝 Test</button>
+              <button class="btn-contact" onclick="contactCandidate('Priya Sharma')">✉️ Contact</button>
+            </div>
+          </div>
+
+          <!-- Candidate 3 -->
+          <div class="cand-card" data-name="Rahul Joshi">
+            <div class="cand-top">
+              <div class="cand-avatar" style="background:linear-gradient(135deg,#06b6d4,#3b82f6)">RJ</div>
+              <div style="flex:1">
+                <div class="cand-name candidate-name">Rahul Joshi</div>
+                <div class="cand-role candidate-role">DevOps Engineer</div>
+                <div class="cand-location">📍 Hyderabad · Remote</div>
+              </div>
+              <span class="badge badge-cyan">Interviewing</span>
+            </div>
+            <div class="cand-score-row">
+              <div class="score-pill" style="background:rgba(99,102,241,0.1)">
+                <div class="pill-val" style="color:#a5b4fc">88</div>
+                <div class="pill-lbl">Resume Score</div>
+              </div>
+              <div class="score-pill" style="background:rgba(16,185,129,0.1)">
+                <div class="pill-val" style="color:#6ee7b7">85%</div>
+                <div class="pill-lbl">Job Fit</div>
+              </div>
+              <div class="score-pill" style="background:rgba(6,182,212,0.1)">
+                <div class="pill-val" style="color:#67e8f9">5y</div>
+                <div class="pill-lbl">Experience</div>
+              </div>
+            </div>
+            <div class="cand-skills">
+              <span class="cand-skill">Docker</span><span class="cand-skill">Kubernetes</span>
+              <span class="cand-skill">AWS</span><span class="cand-skill">Terraform</span><span class="cand-skill">CI/CD</span>
+            </div>
+            <div class="cand-actions">
+              <button class="btn-view" onclick="viewProfile('Rahul Joshi')">👁️ View</button>
+              <button class="btn-test" onclick="assignTest('Rahul Joshi')">📝 Test</button>
+              <button class="btn-contact" onclick="contactCandidate('Rahul Joshi')">✉️ Contact</button>
+            </div>
+          </div>
+
+          <!-- Candidate 4 -->
+          <div class="cand-card" data-name="Sneha Patel">
+            <div class="cand-top">
+              <div class="cand-avatar" style="background:linear-gradient(135deg,#10b981,#14b8a6)">SP</div>
+              <div style="flex:1">
+                <div class="cand-name candidate-name">Sneha Patel</div>
+                <div class="cand-role candidate-role">ML Engineer</div>
+                <div class="cand-location">📍 Pune · Hybrid</div>
+              </div>
+              <span class="badge badge-green">Open</span>
+            </div>
+            <div class="cand-score-row">
+              <div class="score-pill" style="background:rgba(99,102,241,0.1)">
+                <div class="pill-val" style="color:#a5b4fc">85</div>
+                <div class="pill-lbl">Resume Score</div>
+              </div>
+              <div class="score-pill" style="background:rgba(16,185,129,0.1)">
+                <div class="pill-val" style="color:#6ee7b7">80%</div>
+                <div class="pill-lbl">Job Fit</div>
+              </div>
+              <div class="score-pill" style="background:rgba(6,182,212,0.1)">
+                <div class="pill-val" style="color:#67e8f9">2y</div>
+                <div class="pill-lbl">Experience</div>
+              </div>
+            </div>
+            <div class="cand-skills">
+              <span class="cand-skill">PyTorch</span><span class="cand-skill">NLP</span>
+              <span class="cand-skill">Scikit-learn</span><span class="cand-skill">Python</span>
+            </div>
+            <div class="cand-actions">
+              <button class="btn-view" onclick="viewProfile('Sneha Patel')">👁️ View</button>
+              <button class="btn-test" onclick="assignTest('Sneha Patel')">📝 Test</button>
+              <button class="btn-contact" onclick="contactCandidate('Sneha Patel')">✉️ Contact</button>
+            </div>
+          </div>
+
+          <!-- Candidate 5 -->
+          <div class="cand-card" data-name="Vikram Singh">
+            <div class="cand-top">
+              <div class="cand-avatar" style="background:linear-gradient(135deg,#f59e0b,#ef4444)">VS</div>
+              <div style="flex:1">
+                <div class="cand-name candidate-name">Vikram Singh</div>
+                <div class="cand-role candidate-role">Frontend Developer</div>
+                <div class="cand-location">📍 Delhi · Remote OK</div>
+              </div>
+              <span class="badge badge-orange">Offer Pending</span>
+            </div>
+            <div class="cand-score-row">
+              <div class="score-pill" style="background:rgba(99,102,241,0.1)">
+                <div class="pill-val" style="color:#a5b4fc">82</div>
+                <div class="pill-lbl">Resume Score</div>
+              </div>
+              <div class="score-pill" style="background:rgba(16,185,129,0.1)">
+                <div class="pill-val" style="color:#6ee7b7">78%</div>
+                <div class="pill-lbl">Job Fit</div>
+              </div>
+              <div class="score-pill" style="background:rgba(6,182,212,0.1)">
+                <div class="pill-val" style="color:#67e8f9">3y</div>
+                <div class="pill-lbl">Experience</div>
+              </div>
+            </div>
+            <div class="cand-skills">
+              <span class="cand-skill">Vue.js</span><span class="cand-skill">React</span>
+              <span class="cand-skill">TypeScript</span><span class="cand-skill">Tailwind</span>
+            </div>
+            <div class="cand-actions">
+              <button class="btn-view" onclick="viewProfile('Vikram Singh')">👁️ View</button>
+              <button class="btn-test" onclick="assignTest('Vikram Singh')">📝 Test</button>
+              <button class="btn-contact" onclick="contactCandidate('Vikram Singh')">✉️ Contact</button>
+            </div>
+          </div>
+
+          <!-- Candidate 6 -->
+          <div class="cand-card" data-name="Ananya Roy">
+            <div class="cand-top">
+              <div class="cand-avatar" style="background:linear-gradient(135deg,#8b5cf6,#ec4899)">AR</div>
+              <div style="flex:1">
+                <div class="cand-name candidate-name">Ananya Roy</div>
+                <div class="cand-role candidate-role">Backend Engineer</div>
+                <div class="cand-location">📍 Kolkata · Remote</div>
+              </div>
+              <span class="badge badge-green">Open</span>
+            </div>
+            <div class="cand-score-row">
+              <div class="score-pill" style="background:rgba(99,102,241,0.1)">
+                <div class="pill-val" style="color:#a5b4fc">79</div>
+                <div class="pill-lbl">Resume Score</div>
+              </div>
+              <div class="score-pill" style="background:rgba(16,185,129,0.1)">
+                <div class="pill-val" style="color:#6ee7b7">74%</div>
+                <div class="pill-lbl">Job Fit</div>
+              </div>
+              <div class="score-pill" style="background:rgba(6,182,212,0.1)">
+                <div class="pill-val" style="color:#67e8f9">2y</div>
+                <div class="pill-lbl">Experience</div>
+              </div>
+            </div>
+            <div class="cand-skills">
+              <span class="cand-skill">Java</span><span class="cand-skill">Spring Boot</span>
+              <span class="cand-skill">PostgreSQL</span><span class="cand-skill">Redis</span>
+            </div>
+            <div class="cand-actions">
+              <button class="btn-view" onclick="viewProfile('Ananya Roy')">👁️ View</button>
+              <button class="btn-test" onclick="assignTest('Ananya Roy')">📝 Test</button>
+              <button class="btn-contact" onclick="contactCandidate('Ananya Roy')">✉️ Contact</button>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Shortlisted Tab -->
+      <div class="tab-content" id="tab-shortlisted">
+        <div style="padding:3rem;text-align:center;background:var(--bg-card);border:1px dashed var(--border-glass);border-radius:16px">
+          <div style="font-size:3rem;margin-bottom:1rem">⭐</div>
+          <h3 style="color:var(--text-primary);margin-bottom:0.5rem">8 Candidates Shortlisted</h3>
+          <p style="color:var(--text-muted);font-size:0.88rem">Shortlist candidates from the main pool by clicking View → Shortlist.</p>
+        </div>
+      </div>
+
+      <!-- Tests Tab -->
+      <div class="tab-content" id="tab-tests">
+        <div style="margin-bottom:1.5rem;display:flex;justify-content:space-between;align-items:center">
+          <div class="section-title-sm">📝 Available Skill Tests</div>
+          <button class="btn btn-primary btn-sm">+ Create Custom Test</button>
+        </div>
+        <div id="tests-list">
+          <div class="test-card">
+            <div class="test-icon" style="background:rgba(99,102,241,0.12)">⚛️</div>
+            <div style="flex:1">
+              <div class="test-name">React.js Proficiency Test</div>
+              <div class="test-meta"><span>⏱️ 60 min</span><span>❓ 40 questions</span><span>📊 Auto-graded</span></div>
+            </div>
+            <span class="badge badge-purple" style="margin-right:0.75rem">Intermediate</span>
+            <button class="btn-assign" onclick="assignTestToAll('React.js Test')">Assign</button>
+          </div>
+          <div class="test-card">
+            <div class="test-icon" style="background:rgba(6,182,212,0.12)">☁️</div>
+            <div style="flex:1">
+              <div class="test-name">AWS Cloud Fundamentals</div>
+              <div class="test-meta"><span>⏱️ 45 min</span><span>❓ 30 questions</span><span>📊 Auto-graded</span></div>
+            </div>
+            <span class="badge badge-cyan" style="margin-right:0.75rem">Beginner</span>
+            <button class="btn-assign" onclick="assignTestToAll('AWS Test')">Assign</button>
+          </div>
+          <div class="test-card">
+            <div class="test-icon" style="background:rgba(245,158,11,0.12)">🐍</div>
+            <div style="flex:1">
+              <div class="test-name">Python & Data Science Challenge</div>
+              <div class="test-meta"><span>⏱️ 90 min</span><span>❓ 5 coding tasks</span><span>📊 AI-graded</span></div>
+            </div>
+            <span class="badge badge-orange" style="margin-right:0.75rem">Advanced</span>
+            <button class="btn-assign" onclick="assignTestToAll('Python Test')">Assign</button>
+          </div>
+          <div class="test-card">
+            <div class="test-icon" style="background:rgba(99,102,241,0.12)">🐳</div>
+            <div style="flex:1">
+              <div class="test-name">Docker & Kubernetes Scenarios</div>
+              <div class="test-meta"><span>⏱️ 75 min</span><span>❓ 25 questions + lab</span><span>📊 Auto-graded</span></div>
+            </div>
+            <span class="badge badge-purple" style="margin-right:0.75rem">Advanced</span>
+            <button class="btn-assign" onclick="assignTestToAll('DevOps Test')">Assign</button>
+          </div>
+          <div class="test-card">
+            <div class="test-icon" style="background:rgba(16,185,129,0.12)">💾</div>
+            <div style="flex:1">
+              <div class="test-name">SQL & Database Design</div>
+              <div class="test-meta"><span>⏱️ 50 min</span><span>❓ 35 questions</span><span>📊 Auto-graded</span></div>
+            </div>
+            <span class="badge badge-green" style="margin-right:0.75rem">Intermediate</span>
+            <button class="btn-assign" onclick="assignTestToAll('SQL Test')">Assign</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Analytics Tab -->
+      <div class="tab-content" id="tab-analytics">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem">
+          <div style="padding:1.5rem;background:var(--bg-card);border:1px solid var(--border-glass);border-radius:16px">
+            <div class="section-title-sm" style="margin-bottom:1rem">📊 Candidate Score Distribution</div>
+            <div class="chart-container" style="height:220px">
+              <canvas id="scoreDistChart"></canvas>
+            </div>
+          </div>
+          <div style="padding:1.5rem;background:var(--bg-card);border:1px solid var(--border-glass);border-radius:16px">
+            <div class="section-title-sm" style="margin-bottom:1rem">🎯 Skills in Candidate Pool</div>
+            <div class="chart-container" style="height:220px">
+              <canvas id="poolSkillsChart"></canvas>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<!-- Profile Modal -->
+<div id="profileModal" style="display:none;position:fixed;inset:0;z-index:200;background:rgba(0,0,0,0.7);backdrop-filter:blur(6px);align-items:center;justify-content:center">
+  <div style="background:#0f1629;border:1px solid rgba(99,102,241,0.25);border-radius:20px;padding:2rem;max-width:480px;width:90%;max-height:80vh;overflow-y:auto">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem">
+      <h3 id="modalCandName" style="font-size:1.1rem;font-weight:700;color:var(--text-primary)"></h3>
+      <button onclick="closeModal()" style="background:rgba(255,255,255,0.06);border:none;color:var(--text-muted);width:32px;height:32px;border-radius:50%;cursor:pointer;font-size:1rem">✕</button>
+    </div>
+    <p id="modalContent" style="color:var(--text-secondary);font-size:0.9rem;line-height:1.7"></p>
+    <div style="display:flex;gap:10px;margin-top:1.5rem">
+      <button onclick="closeModal()" class="btn btn-secondary btn-sm" style="flex:1;justify-content:center">Close</button>
+      <button class="btn btn-primary btn-sm" style="flex:1;justify-content:center">⭐ Shortlist</button>
+    </div>
+  </div>
+</div>
+
+<script src="resumeai.js"></script>
+<script>
+function switchTab(btn, id) {
+  document.querySelectorAll('.portal-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+  btn.classList.add('active');
+  const tab = document.getElementById('tab-' + id);
+  if (tab) {
+    tab.classList.add('active');
+    if (id === 'analytics') initAnalyticsCharts();
+  }
+}
+
+function viewProfile(name) {
+  document.getElementById('modalCandName').textContent = '👤 ' + name;
+  document.getElementById('modalContent').innerHTML = `
+    <strong style="color:var(--text-primary)">${name}</strong> has a strong profile with verified skills and active certifications.<br/><br/>
+    📊 Resume Score: <strong style="color:#a5b4fc">88/100</strong><br/>
+    🎯 Job Fit: <strong style="color:#6ee7b7">85%</strong> match for your open role<br/>
+    📅 Available from: <strong style="color:var(--text-primary)">Immediate</strong><br/>
+    💼 Looking for: Full-time, Remote<br/><br/>
+    <em style="color:var(--text-muted)">Skills validated by ResumeAI assessment system.</em>
+  `;
+  const modal = document.getElementById('profileModal');
+  modal.style.display = 'flex';
+}
+
+function assignTest(name) {
+  showToast('Test invitation sent to ' + name + ' ✅', 'success');
+}
+
+function assignTestToAll(testName) {
+  showToast(testName + ' assigned to 8 shortlisted candidates!', 'success');
+}
+
+function contactCandidate(name) {
+  showToast('Message sent to ' + name + '!', 'success');
+}
+
+function closeModal() {
+  document.getElementById('profileModal').style.display = 'none';
+}
+
+let chartsInitialized = false;
+function initAnalyticsCharts() {
+  if (chartsInitialized) return;
+  chartsInitialized = true;
+
+  const scoreCtx = document.getElementById('scoreDistChart');
+  if (scoreCtx) {
+    new Chart(scoreCtx, {
+      type: 'bar',
+      data: {
+        labels: ['50-60', '60-70', '70-80', '80-90', '90-100'],
+        datasets: [{
+          label: 'Candidates',
+          data: [4, 12, 28, 35, 15],
+          backgroundColor: ['rgba(239,68,68,0.5)','rgba(245,158,11,0.5)','rgba(6,182,212,0.5)','rgba(99,102,241,0.5)','rgba(16,185,129,0.5)'],
+          borderColor: ['#ef4444','#f59e0b','#06b6d4','#6366f1','#10b981'],
+          borderWidth: 2, borderRadius: 6
+        }]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+          x: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#64748b', font: { size: 11 } } },
+          y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#64748b', font: { size: 11 } } }
+        }
+      }
+    });
+  }
+
+  const skillsCtx = document.getElementById('poolSkillsChart');
+  if (skillsCtx) {
+    new Chart(skillsCtx, {
+      type: 'doughnut',
+      data: {
+        labels: ['React/JS', 'Python/ML', 'Java', 'Cloud', 'DevOps', 'Other'],
+        datasets: [{
+          data: [32, 24, 18, 14, 8, 4],
+          backgroundColor: ['#6366f1','#10b981','#06b6d4','#f59e0b','#ec4899','#64748b'],
+          borderColor: 'transparent', borderWidth: 0
+        }]
+      },
+      options: {
+        cutout: '60%', responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { position: 'right', labels: { color: '#94a3b8', font: { size: 10 }, padding: 8 } } }
+      }
+    });
+  }
+}
+
+// Candidate search filter
+document.addEventListener('DOMContentLoaded', () => {
+  initSidebar();
+  initAnimatedNumbers();
+
+  const searchInput = document.getElementById('candidateSearch');
+  if (searchInput) {
+    searchInput.addEventListener('input', () => {
+      const q = searchInput.value.toLowerCase();
+      document.querySelectorAll('.cand-card').forEach(card => {
+        const name = card.querySelector('.candidate-name')?.textContent.toLowerCase() || '';
+        const role = card.querySelector('.candidate-role')?.textContent.toLowerCase() || '';
+        const skills = Array.from(card.querySelectorAll('.cand-skill')).map(s => s.textContent.toLowerCase()).join(' ');
+        card.style.display = (!q || name.includes(q) || role.includes(q) || skills.includes(q)) ? '' : 'none';
+      });
+    });
+  }
+});
+</script>
+</body>
+</html>
