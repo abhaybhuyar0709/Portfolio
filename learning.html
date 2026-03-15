@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Learning Paths – ResumeAI</title>
+  <link rel="stylesheet" href="resumeai.css" />
+  <style>
+    /* Filter tabs */
+    .filter-tabs { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 1.5rem; }
+    .filter-tab { padding: 7px 18px; border-radius: 20px; font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: all 0.2s; border: 1px solid var(--border-glass); background: transparent; color: var(--text-secondary); }
+    .filter-tab.active, .filter-tab:hover { background: rgba(99,102,241,0.15); border-color: rgba(99,102,241,0.35); color: #a5b4fc; }
+
+    /* Learning path card */
+    .lp-card { padding: 1.5rem; background: var(--bg-card); border: 1px solid var(--border-glass); border-radius: 16px; transition: all 0.3s; }
+    .lp-card:hover { border-color: rgba(99,102,241,0.3); transform: translateY(-3px); box-shadow: 0 12px 40px rgba(0,0,0,0.3); }
+
+    .lp-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 1rem; gap: 1rem; }
+    .lp-icon { width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.4rem; flex-shrink: 0; }
+    .lp-title { font-size: 0.95rem; font-weight: 700; color: var(--text-primary); margin-bottom: 4px; }
+    .lp-provider { font-size: 0.78rem; color: var(--text-muted); }
+    .lp-desc { font-size: 0.85rem; color: var(--text-secondary); line-height: 1.6; margin-bottom: 1rem; }
+    .lp-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 1rem; }
+    .lp-tag { padding: 3px 10px; border-radius: 12px; font-size: 0.75rem; font-weight: 600; background: rgba(255,255,255,0.05); color: var(--text-muted); border: 1px solid rgba(255,255,255,0.06); }
+    .lp-footer { display: flex; align-items: center; justify-content: space-between; padding-top: 0.75rem; border-top: 1px solid var(--border-glass); }
+    .lp-meta { font-size: 0.78rem; color: var(--text-muted); display: flex; align-items: center; gap: 6px; }
+
+    /* Certifications */
+    .cert-card { display: flex; gap: 1rem; padding: 1.25rem; background: var(--bg-card); border: 1px solid var(--border-glass); border-radius: 14px; align-items: center; transition: all 0.3s; }
+    .cert-card:hover { border-color: rgba(99,102,241,0.25); transform: translateX(3px); }
+    .cert-icon { width: 52px; height: 52px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; flex-shrink: 0; }
+    .cert-info { flex: 1; }
+    .cert-name { font-size: 0.92rem; font-weight: 700; color: var(--text-primary); }
+    .cert-org { font-size: 0.78rem; color: var(--text-muted); margin-top: 2px; }
+    .cert-details { font-size: 0.78rem; color: var(--text-secondary); margin-top: 6px; display: flex; gap: 12px; flex-wrap: wrap; }
+
+    /* Projects */
+    .project-card { padding: 1.25rem; background: var(--bg-card); border: 1px solid var(--border-glass); border-radius: 14px; transition: all 0.3s; }
+    .project-card:hover { border-color: rgba(99,102,241,0.25); box-shadow: 0 8px 30px rgba(0,0,0,0.3); }
+    .project-difficulty { display: inline-flex; align-items: center; gap: 4px; padding: 3px 10px; border-radius: 12px; font-size: 0.72rem; font-weight: 700; }
+    .diff-beginner { background: rgba(16,185,129,0.12); color: #6ee7b7; }
+    .diff-intermediate { background: rgba(245,158,11,0.12); color: #fcd34d; }
+    .diff-advanced { background: rgba(239,68,68,0.12); color: #fca5a5; }
+  </style>
+</head>
+<body>
+<div class="app-layout">
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+      <div class="brand-logo">🧠</div>
+      <div class="brand-text">ResumeAI</div>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-section-title">Main</div>
+      <a class="nav-item" href="dashboard.html"><span class="nav-icon">📊</span> Dashboard</a>
+      <a class="nav-item" href="upload.html"><span class="nav-icon">📄</span> Upload Resume</a>
+      <a class="nav-item active" href="learning.html"><span class="nav-icon">🎓</span> Learning Paths</a>
+      <a class="nav-item" href="insights.html"><span class="nav-icon">📈</span> Market Insights</a>
+      <div class="nav-section-title">Tools</div>
+      <a class="nav-item" href="recruiter.html"><span class="nav-icon">🏢</span> Recruiter Portal</a>
+      <a class="nav-item" href="resumeai.html"><span class="nav-icon">🏠</span> Home</a>
+    </nav>
+    <div class="sidebar-footer">
+      <div style="display:flex;align-items:center;gap:10px">
+        <div class="user-avatar-sm">AB</div>
+        <div>
+          <div style="font-size:0.85rem;font-weight:700;color:var(--text-primary)">Abhay Bhuyar</div>
+          <div style="font-size:0.74rem;color:var(--text-muted)">MCA Student</div>
+        </div>
+      </div>
+    </div>
+  </aside>
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+  <main class="main-content">
+    <div class="page-header">
+      <div>
+        <button aria-label="Toggle navigation menu" type="button" class="hamburger" id="sidebarToggle"><span></span><span></span><span></span></button>
+        <h1 class="page-title">Learning Recommendations</h1>
+        <p class="page-subtitle">AI-curated courses, certifications and projects to close your skill gaps</p>
+      </div>
+      <div>
+        <div class="search-bar" style="min-width:220px">
+          <span>🔍</span>
+          <input type="text" placeholder="Search courses..." />
+        </div>
+      </div>
+    </div>
+
+    <div class="page-body">
+
+      <!-- Progress summary -->
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:1.25rem;margin-bottom:2rem">
+        <div class="stat-card purple">
+          <div class="stat-icon purple">🎓</div>
+          <div class="stat-value" data-count="12" data-suffix="">0</div>
+          <div class="stat-label">Courses Enrolled</div>
+        </div>
+        <div class="stat-card green">
+          <div class="stat-icon green">✅</div>
+          <div class="stat-value" data-count="5" data-suffix="">0</div>
+          <div class="stat-label">Completed</div>
+        </div>
+        <div class="stat-card cyan">
+          <div class="stat-icon cyan">🏆</div>
+          <div class="stat-value" data-count="3" data-suffix="">0</div>
+          <div class="stat-label">Certifications</div>
+        </div>
+        <div class="stat-card pink">
+          <div class="stat-icon pink">⏱️</div>
+          <div class="stat-value" data-count="48" data-suffix="h">0</div>
+          <div class="stat-label">Hours Learned</div>
+        </div>
+      </div>
+
+      <!-- Filter Tabs -->
+      <div class="filter-tabs">
+        <button type="button" class="filter-tab active" onclick="filterTab(this,'all')">All</button>
+        <button type="button" class="filter-tab" onclick="filterTab(this,'courses')">📚 Courses</button>
+        <button type="button" class="filter-tab" onclick="filterTab(this,'certs')">🏆 Certifications</button>
+        <button type="button" class="filter-tab" onclick="filterTab(this,'projects')">🛠️ Projects</button>
+        <button type="button" class="filter-tab" onclick="filterTab(this,'paths')">🗺️ Learning Paths</button>
+      </div>
+
+      <!-- Courses Section -->
+      <div class="section-tab all courses">
+        <div class="section-header" style="margin-bottom:1rem">
+          <div class="section-title-sm">📚 Recommended Courses</div>
+          <span class="badge badge-purple">8 new</span>
+        </div>
+        <div class="grid-3" style="margin-bottom:2.5rem">
+
+          <div class="lp-card">
+            <div class="lp-header">
+              <div>
+                <div class="lp-icon" style="background:rgba(6,182,212,0.12)">☁️</div>
+              </div>
+              <span class="badge badge-cyan">Hot 🔥</span>
+            </div>
+            <div class="lp-title">AWS Solutions Architect Associate</div>
+            <div class="lp-provider">Amazon Web Services · Coursera</div>
+            <div class="lp-desc" style="margin-top:0.5rem">Learn to design scalable, highly available, and fault-tolerant systems on AWS cloud infrastructure.</div>
+            <div class="lp-tags">
+              <span class="lp-tag">Cloud</span><span class="lp-tag">AWS</span><span class="lp-tag">Architecture</span>
+            </div>
+            <div style="margin-bottom:0.75rem">
+              <div style="display:flex;justify-content:space-between;margin-bottom:5px;font-size:0.78rem">
+                <span style="color:var(--text-muted)">Progress</span><span style="color:var(--accent-primary);font-weight:700">60%</span>
+              </div>
+              <div class="progress-bar"><div class="progress-fill cyan" data-width="60"></div></div>
+            </div>
+            <div class="lp-footer">
+              <div class="lp-meta">⏱️ 40h total &nbsp;·&nbsp; ⭐ 4.8</div>
+              <button type="button" class="btn btn-primary btn-sm">Continue →</button>
+            </div>
+          </div>
+
+          <div class="lp-card">
+            <div class="lp-header">
+              <div>
+                <div class="lp-icon" style="background:rgba(99,102,241,0.12)">🐳</div>
+              </div>
+              <span class="badge badge-purple">Gap Fix</span>
+            </div>
+            <div class="lp-title">Docker &amp; Kubernetes Masterclass</div>
+            <div class="lp-provider">Pluralsight</div>
+            <div class="lp-desc" style="margin-top:0.5rem">Master containerization, orchestration, and CI/CD pipelines with Docker and Kubernetes.</div>
+            <div class="lp-tags">
+              <span class="lp-tag">DevOps</span><span class="lp-tag">Docker</span><span class="lp-tag">K8s</span>
+            </div>
+            <div style="margin-bottom:0.75rem">
+              <div style="display:flex;justify-content:space-between;margin-bottom:5px;font-size:0.78rem">
+                <span style="color:var(--text-muted)">Progress</span><span style="color:var(--accent-primary);font-weight:700">0%</span>
+              </div>
+              <div class="progress-bar"><div class="progress-fill purple" data-width="0"></div></div>
+            </div>
+            <div class="lp-footer">
+              <div class="lp-meta">⏱️ 28h total &nbsp;·&nbsp; ⭐ 4.7</div>
+              <button type="button" class="btn btn-primary btn-sm">Start Now</button>
+            </div>
+          </div>
+
+          <div class="lp-card">
+            <div class="lp-header">
+              <div>
+                <div class="lp-icon" style="background:rgba(245,158,11,0.12)">🤖</div>
+              </div>
+              <span class="badge badge-orange">Trending</span>
+            </div>
+            <div class="lp-title">Machine Learning A-Z</div>
+            <div class="lp-provider">Udemy</div>
+            <div class="lp-desc" style="margin-top:0.5rem">Complete guide to machine learning with Python: regression, classification, clustering, and deep learning.</div>
+            <div class="lp-tags">
+              <span class="lp-tag">Python</span><span class="lp-tag">ML</span><span class="lp-tag">TensorFlow</span>
+            </div>
+            <div style="margin-bottom:0.75rem">
+              <div style="display:flex;justify-content:space-between;margin-bottom:5px;font-size:0.78rem">
+                <span style="color:var(--text-muted)">Progress</span><span style="color:var(--accent-primary);font-weight:700">35%</span>
+              </div>
+              <div class="progress-bar"><div class="progress-fill orange" data-width="35"></div></div>
+            </div>
+            <div class="lp-footer">
+              <div class="lp-meta">⏱️ 44h total &nbsp;·&nbsp; ⭐ 4.6</div>
+              <button type="button" class="btn btn-primary btn-sm">Continue →</button>
+            </div>
+          </div>
+
+          <div class="lp-card">
+            <div class="lp-header">
+              <div>
+                <div class="lp-icon" style="background:rgba(16,185,129,0.12)">📘</div>
+              </div>
+              <span class="badge badge-green">Recommended</span>
+            </div>
+            <div class="lp-title">TypeScript for React Developers</div>
+            <div class="lp-provider">Frontend Masters</div>
+            <div class="lp-desc" style="margin-top:0.5rem">Upgrade from JavaScript to TypeScript and build type-safe React applications at scale.</div>
+            <div class="lp-tags">
+              <span class="lp-tag">TypeScript</span><span class="lp-tag">React</span><span class="lp-tag">Frontend</span>
+            </div>
+            <div style="margin-bottom:0.75rem">
+              <div style="display:flex;justify-content:space-between;margin-bottom:5px;font-size:0.78rem">
+                <span style="color:var(--text-muted)">Progress</span><span style="color:var(--accent-primary);font-weight:700">0%</span>
+              </div>
+              <div class="progress-bar"><div class="progress-fill green" data-width="0"></div></div>
+            </div>
+            <div class="lp-footer">
+              <div class="lp-meta">⏱️ 16h total &nbsp;·&nbsp; ⭐ 4.9</div>
+              <button type="button" class="btn btn-primary btn-sm">Enroll Free</button>
+            </div>
+          </div>
+
+          <div class="lp-card">
+            <div class="lp-header">
+              <div>
+                <div class="lp-icon" style="background:rgba(236,72,153,0.12)">🌐</div>
+              </div>
+            </div>
+            <div class="lp-title">GraphQL with Node.js</div>
+            <div class="lp-provider">Apollo / Udemy</div>
+            <div class="lp-desc" style="margin-top:0.5rem">Build modern APIs with GraphQL, Apollo Server, and Node.js. Replace REST with efficient data fetching.</div>
+            <div class="lp-tags">
+              <span class="lp-tag">GraphQL</span><span class="lp-tag">Node.js</span><span class="lp-tag">API</span>
+            </div>
+            <div style="margin-bottom:0.75rem">
+              <div style="display:flex;justify-content:space-between;margin-bottom:5px;font-size:0.78rem">
+                <span style="color:var(--text-muted)">Progress</span><span style="color:var(--accent-primary);font-weight:700">0%</span>
+              </div>
+              <div class="progress-bar"><div class="progress-fill pink" data-width="0"></div></div>
+            </div>
+            <div class="lp-footer">
+              <div class="lp-meta">⏱️ 22h total &nbsp;·&nbsp; ⭐ 4.7</div>
+              <button type="button" class="btn btn-primary btn-sm">Start Now</button>
+            </div>
+          </div>
+
+          <div class="lp-card">
+            <div class="lp-header">
+              <div>
+                <div class="lp-icon" style="background:rgba(139,92,246,0.12)">🏗️</div>
+              </div>
+              <span class="badge badge-purple">Gap Fix</span>
+            </div>
+            <div class="lp-title">System Design Interview</div>
+            <div class="lp-provider">Educative.io</div>
+            <div class="lp-desc" style="margin-top:0.5rem">Master system design concepts for tech interviews: scalability, microservices, databases, and more.</div>
+            <div class="lp-tags">
+              <span class="lp-tag">System Design</span><span class="lp-tag">Architecture</span>
+            </div>
+            <div style="margin-bottom:0.75rem">
+              <div style="display:flex;justify-content:space-between;margin-bottom:5px;font-size:0.78rem">
+                <span style="color:var(--text-muted)">Progress</span><span style="color:var(--accent-primary);font-weight:700">20%</span>
+              </div>
+              <div class="progress-bar"><div class="progress-fill purple" data-width="20"></div></div>
+            </div>
+            <div class="lp-footer">
+              <div class="lp-meta">⏱️ 30h total &nbsp;·&nbsp; ⭐ 4.8</div>
+              <button type="button" class="btn btn-primary btn-sm">Continue →</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Certifications -->
+      <div class="section-tab all certs">
+        <div class="section-header" style="margin-bottom:1rem">
+          <div class="section-title-sm">🏆 Recommended Certifications</div>
+          <span class="badge badge-orange">High ROI</span>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:0.75rem;margin-bottom:2.5rem">
+          <div class="cert-card">
+            <div class="cert-icon" style="background:rgba(245,158,11,0.12)">☁️</div>
+            <div class="cert-info">
+              <div class="cert-name">AWS Solutions Architect Associate</div>
+              <div class="cert-org">Amazon Web Services</div>
+              <div class="cert-details"><span>⏱️ 3-6 months prep</span><span>💰 $150 exam fee</span><span>📈 +35% salary boost</span></div>
+            </div>
+            <div style="flex-shrink:0">
+              <span class="badge badge-orange">Priority 1</span>
+            </div>
+          </div>
+          <div class="cert-card">
+            <div class="cert-icon" style="background:rgba(99,102,241,0.12)">🐳</div>
+            <div class="cert-info">
+              <div class="cert-name">Certified Kubernetes Administrator (CKA)</div>
+              <div class="cert-org">Cloud Native Computing Foundation</div>
+              <div class="cert-details"><span>⏱️ 4-8 months prep</span><span>💰 $395 exam fee</span><span>📈 +42% salary boost</span></div>
+            </div>
+            <div style="flex-shrink:0">
+              <span class="badge badge-purple">Priority 2</span>
+            </div>
+          </div>
+          <div class="cert-card">
+            <div class="cert-icon" style="background:rgba(16,185,129,0.12)">🤖</div>
+            <div class="cert-info">
+              <div class="cert-name">TensorFlow Developer Certificate</div>
+              <div class="cert-org">Google</div>
+              <div class="cert-details"><span>⏱️ 2-4 months prep</span><span>💰 $100 exam fee</span><span>📈 +28% salary boost</span></div>
+            </div>
+            <div style="flex-shrink:0">
+              <span class="badge badge-green">Priority 3</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Projects -->
+      <div class="section-tab all projects">
+        <div class="section-header" style="margin-bottom:1rem">
+          <div class="section-title-sm">🛠️ Recommended Projects</div>
+          <span class="badge badge-cyan">Portfolio Boosters</span>
+        </div>
+        <div class="grid-3" style="margin-bottom:2.5rem">
+          <div class="project-card">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.75rem">
+              <span style="font-size:1.8rem">🛒</span>
+              <span class="project-difficulty diff-intermediate">Intermediate</span>
+            </div>
+            <div style="font-size:0.92rem;font-weight:700;color:var(--text-primary);margin-bottom:0.4rem">Full-Stack E-Commerce App</div>
+            <div style="font-size:0.82rem;color:var(--text-secondary);line-height:1.5;margin-bottom:0.75rem">Build a complete e-commerce platform with React, Node.js, MongoDB, and Stripe payments. Covers auth, cart, and admin dashboard.</div>
+            <div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:0.75rem">
+              <span class="lp-tag">React</span><span class="lp-tag">Node.js</span><span class="lp-tag">MongoDB</span><span class="lp-tag">Stripe</span>
+            </div>
+            <button type="button" class="btn btn-outline btn-sm" style="width:100%;justify-content:center">View Project Guide</button>
+          </div>
+          <div class="project-card">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.75rem">
+              <span style="font-size:1.8rem">🤖</span>
+              <span class="project-difficulty diff-advanced">Advanced</span>
+            </div>
+            <div style="font-size:0.92rem;font-weight:700;color:var(--text-primary);margin-bottom:0.4rem">AI Resume Parser API</div>
+            <div style="font-size:0.82rem;color:var(--text-secondary);line-height:1.5;margin-bottom:0.75rem">Build your own resume parsing microservice using Python, FastAPI, spaCy NLP, and deploy on AWS Lambda with Docker.</div>
+            <div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:0.75rem">
+              <span class="lp-tag">Python</span><span class="lp-tag">FastAPI</span><span class="lp-tag">Docker</span><span class="lp-tag">AWS</span>
+            </div>
+            <button type="button" class="btn btn-outline btn-sm" style="width:100%;justify-content:center">View Project Guide</button>
+          </div>
+          <div class="project-card">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.75rem">
+              <span style="font-size:1.8rem">📊</span>
+              <span class="project-difficulty diff-beginner">Beginner</span>
+            </div>
+            <div style="font-size:0.92rem;font-weight:700;color:var(--text-primary);margin-bottom:0.4rem">Real-Time Analytics Dashboard</div>
+            <div style="font-size:0.82rem;color:var(--text-secondary);line-height:1.5;margin-bottom:0.75rem">Create a real-time data visualization dashboard using React, Chart.js, WebSockets, and a Node.js backend with Redis caching.</div>
+            <div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:0.75rem">
+              <span class="lp-tag">React</span><span class="lp-tag">Chart.js</span><span class="lp-tag">Redis</span>
+            </div>
+            <button type="button" class="btn btn-outline btn-sm" style="width:100%;justify-content:center">View Project Guide</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Learning Paths -->
+      <div class="section-tab all paths">
+        <div class="section-header" style="margin-bottom:1rem">
+          <div class="section-title-sm">🗺️ Curated Learning Paths</div>
+        </div>
+        <div class="grid-2">
+          <div style="padding:1.5rem;background:linear-gradient(135deg,rgba(99,102,241,0.1),rgba(139,92,246,0.06));border:1px solid rgba(99,102,241,0.2);border-radius:16px">
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:1rem">
+              <span style="font-size:1.8rem">🚀</span>
+              <div>
+                <div style="font-size:0.95rem;font-weight:700;color:var(--text-primary)">Full-Stack Developer</div>
+                <div style="font-size:0.78rem;color:var(--text-muted)">6-month path · 12 courses</div>
+              </div>
+              <span class="badge badge-green" style="margin-left:auto">60% Done</span>
+            </div>
+            <div class="progress-bar" style="height:8px;margin-bottom:1rem"><div class="progress-fill purple" data-width="60"></div></div>
+            <div style="font-size:0.82rem;color:var(--text-secondary);margin-bottom:1rem">Master React, Node.js, databases, and cloud deployment to become a job-ready full-stack developer.</div>
+            <button type="button" class="btn btn-primary btn-sm">Continue Path →</button>
+          </div>
+          <div style="padding:1.5rem;background:linear-gradient(135deg,rgba(6,182,212,0.08),rgba(59,130,246,0.05));border:1px solid rgba(6,182,212,0.15);border-radius:16px">
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:1rem">
+              <span style="font-size:1.8rem">☁️</span>
+              <div>
+                <div style="font-size:0.95rem;font-weight:700;color:var(--text-primary)">Cloud &amp; DevOps Engineer</div>
+                <div style="font-size:0.78rem;color:var(--text-muted)">8-month path · 15 courses</div>
+              </div>
+              <span class="badge badge-cyan" style="margin-left:auto">Not Started</span>
+            </div>
+            <div class="progress-bar" style="height:8px;margin-bottom:1rem"><div class="progress-fill cyan" data-width="0"></div></div>
+            <div style="font-size:0.82rem;color:var(--text-secondary);margin-bottom:1rem">Learn AWS, Docker, Kubernetes, Terraform, and CI/CD to become a DevOps / Cloud engineer.</div>
+            <button type="button" class="btn btn-outline btn-sm">Start Path</button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<script src="resumeai.js"></script>
+<script>
+function filterTab(btn, tab) {
+  document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+  // Show/hide sections
+  document.querySelectorAll('.section-tab').forEach(s => {
+    if (tab === 'all' || s.classList.contains(tab)) {
+      s.style.display = '';
+    } else {
+      s.style.display = 'none';
+    }
+  });
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  initSidebar();
+  initAnimatedNumbers();
+  initProgressBars();
+});
+</script>
+</body>
+</html>

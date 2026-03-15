@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard – ResumeAI</title>
+  <link rel="stylesheet" href="resumeai.css" />
+  <script src="chart.min.js"></script>
+  <style>
+    .stats-row { display: grid; grid-template-columns: repeat(4,1fr); gap: 1.25rem; margin-bottom: 1.75rem; }
+    .charts-row { display: grid; grid-template-columns: 1.5fr 1fr; gap: 1.5rem; margin-bottom: 1.75rem; }
+    .bottom-row { display: grid; grid-template-columns: 1fr 1fr 1.2fr; gap: 1.5rem; }
+    .card { padding: 1.5rem; background: var(--bg-card); border: 1px solid var(--border-glass); border-radius: 16px; }
+
+    /* Score Arc */
+    .score-arc-wrapper { display:flex; align-items:center; gap: 2rem; flex-wrap: wrap; }
+    .score-arc-text .score-big { font-size: 3rem; font-weight: 900; background: linear-gradient(135deg,#818cf8,#c084fc); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+    .score-arc-text .score-label { font-size: 0.82rem; color: var(--text-muted); }
+
+    /* Skill Items */
+    .skill-row { margin-bottom: 1rem; }
+    .skill-row-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+    .skill-name { font-size: 0.88rem; color: var(--text-secondary); }
+    .skill-pct { font-size: 0.82rem; font-weight: 700; color: var(--accent-primary); }
+
+    /* Courses mini list */
+    .course-item { display: flex; align-items: center; gap: 12px; padding: 0.75rem 0; border-bottom: 1px solid rgba(255,255,255,0.04); }
+    .course-item:last-child { border-bottom: none; }
+    .course-thumb { width: 42px; height: 42px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.3rem; flex-shrink: 0; }
+    .course-info .course-name { font-size: 0.88rem; font-weight: 600; color: var(--text-primary); }
+    .course-info .course-meta { font-size: 0.75rem; color: var(--text-muted); margin-top: 2px; }
+    .course-progress { margin-left: auto; text-align: right; }
+    .course-progress .pct { font-size: 0.78rem; font-weight: 700; color: var(--accent-primary); }
+
+    /* Timeline mini */
+    .roadmap-timeline { position: relative; padding-left: 1.5rem; }
+    .roadmap-timeline::before { content:''; position:absolute; left:6px; top:4px; bottom:4px; width:2px; background: linear-gradient(to bottom, #6366f1, rgba(99,102,241,0.1)); }
+    .rt-item { position: relative; margin-bottom: 1.25rem; }
+    .rt-dot { position: absolute; left: -1.5rem; top: 4px; width: 14px; height: 14px; border-radius: 50%; border: 2px solid var(--bg-primary); }
+    .rt-dot.done { background: #10b981; box-shadow: 0 0 8px rgba(16,185,129,0.5); }
+    .rt-dot.active { background: #6366f1; box-shadow: 0 0 8px rgba(99,102,241,0.6); }
+    .rt-dot.pending { background: #475569; }
+    .rt-title { font-size: 0.88rem; font-weight: 700; color: var(--text-primary); }
+    .rt-sub { font-size: 0.78rem; color: var(--text-muted); margin-top: 2px; }
+
+    /* Alerts */
+    .alert-item { display: flex; align-items: flex-start; gap: 10px; padding: 0.75rem; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); border-radius: 10px; margin-bottom: 0.75rem; }
+    .alert-item:last-child { margin-bottom: 0; }
+    .alert-icon { font-size: 1.1rem; flex-shrink: 0; }
+    .alert-text .alert-title { font-size: 0.85rem; font-weight: 700; color: var(--text-primary); }
+    .alert-text .alert-desc { font-size: 0.78rem; color: var(--text-muted); margin-top: 2px; line-height: 1.4; }
+
+    @media(max-width:1200px) {
+      .stats-row { grid-template-columns: repeat(2,1fr); }
+      .charts-row { grid-template-columns: 1fr; }
+      .bottom-row { grid-template-columns: 1fr 1fr; }
+    }
+    @media(max-width:768px) {
+      .stats-row { grid-template-columns: repeat(2,1fr); }
+      .bottom-row { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+<div class="app-layout">
+
+  <!-- Sidebar -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+      <div class="brand-logo">🧠</div>
+      <div class="brand-text">ResumeAI</div>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-section-title">Main</div>
+      <a class="nav-item active" href="dashboard.html"><span class="nav-icon">📊</span> Dashboard</a>
+      <a class="nav-item" href="upload.html"><span class="nav-icon">📄</span> Upload Resume</a>
+      <a class="nav-item" href="learning.html"><span class="nav-icon">🎓</span> Learning Paths</a>
+      <a class="nav-item" href="insights.html"><span class="nav-icon">📈</span> Market Insights</a>
+
+      <div class="nav-section-title">Tools</div>
+      <a class="nav-item" href="recruiter.html"><span class="nav-icon">🏢</span> Recruiter Portal</a>
+      <a class="nav-item" href="resumeai.html"><span class="nav-icon">🏠</span> Home</a>
+    </nav>
+    <div class="sidebar-footer">
+      <div style="display:flex;align-items:center;gap:10px">
+        <div class="user-avatar-sm">AB</div>
+        <div>
+          <div style="font-size:0.85rem;font-weight:700;color:var(--text-primary)">Abhay Bhuyar</div>
+          <div style="font-size:0.74rem;color:var(--text-muted)">MCA Student</div>
+        </div>
+      </div>
+    </div>
+  </aside>
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+  <!-- Main -->
+  <main class="main-content">
+    <div class="page-header">
+      <div>
+        <button aria-label="Toggle navigation menu" type="button" class="hamburger" id="sidebarToggle"><span></span><span></span><span></span></button>
+        <h1 class="page-title">Dashboard</h1>
+        <p class="page-subtitle">Welcome back, Abhay 👋 Here's your career progress.</p>
+      </div>
+      <div style="display:flex;gap:10px;align-items:center">
+        <span class="badge badge-green">● Online</span>
+        <a href="upload.html" class="btn btn-primary btn-sm">+ New Analysis</a>
+      </div>
+    </div>
+
+    <div class="page-body">
+
+      <!-- Stat Cards -->
+      <div class="stats-row">
+        <div class="stat-card purple animate-fade-up">
+          <div class="stat-icon purple">⭐</div>
+          <div class="stat-value" data-count="87" data-suffix="">0</div>
+          <div class="stat-label">Resume Score</div>
+          <div class="stat-change up">↑ +12 from last analysis</div>
+        </div>
+        <div class="stat-card cyan animate-fade-up delay-100">
+          <div class="stat-icon cyan">🎯</div>
+          <div class="stat-value" data-count="73" data-suffix="%">0</div>
+          <div class="stat-label">Job Readiness</div>
+          <div class="stat-change up">↑ Top 25% of candidates</div>
+        </div>
+        <div class="stat-card green animate-fade-up delay-200">
+          <div class="stat-icon green">✅</div>
+          <div class="stat-value" data-count="24" data-suffix="">0</div>
+          <div class="stat-label">Skills Matched</div>
+          <div class="stat-change up">↑ 4 new since last week</div>
+        </div>
+        <div class="stat-card pink animate-fade-up delay-300">
+          <div class="stat-icon pink">⚠️</div>
+          <div class="stat-value" data-count="8" data-suffix="">0</div>
+          <div class="stat-label">Skill Gaps</div>
+          <div class="stat-change down">↓ 3 resolved this month</div>
+        </div>
+      </div>
+
+      <!-- Charts Row -->
+      <div class="charts-row">
+
+        <!-- Skill Gap Radar -->
+        <div class="card">
+          <div class="section-header">
+            <div class="section-title-sm">📊 Skill Gap Analysis</div>
+            <span class="badge badge-purple">AI Assessed</span>
+          </div>
+          <div class="chart-container" style="height:280px">
+            <canvas id="skillRadarChart"></canvas>
+          </div>
+        </div>
+
+        <!-- Resume Score Donut -->
+        <div class="card">
+          <div class="section-header">
+            <div class="section-title-sm">⭐ Resume Score</div>
+          </div>
+          <div style="display:flex;flex-direction:column;align-items:center;gap:1.5rem">
+            <div style="position:relative;width:160px;height:160px">
+              <canvas id="scoreDonut" width="160" height="160"></canvas>
+              <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center">
+                <span style="font-size:2rem;font-weight:900;background:linear-gradient(135deg,#818cf8,#c084fc);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">87</span>
+                <span style="font-size:0.72rem;color:var(--text-muted)">out of 100</span>
+              </div>
+            </div>
+            <div style="width:100%">
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem">
+                <div style="text-align:center;padding:0.75rem;background:rgba(99,102,241,0.08);border-radius:10px;border:1px solid rgba(99,102,241,0.15)">
+                  <div style="font-size:1.2rem;font-weight:800;color:#a5b4fc">A</div>
+                  <div style="font-size:0.72rem;color:var(--text-muted)">ATS Grade</div>
+                </div>
+                <div style="text-align:center;padding:0.75rem;background:rgba(16,185,129,0.08);border-radius:10px;border:1px solid rgba(16,185,129,0.15)">
+                  <div style="font-size:1.2rem;font-weight:800;color:#6ee7b7">Top 15%</div>
+                  <div style="font-size:0.72rem;color:var(--text-muted)">Market Rank</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bottom Row -->
+      <div class="bottom-row">
+
+        <!-- Top Skills -->
+        <div class="card">
+          <div class="section-header">
+            <div class="section-title-sm">🚀 Skill Proficiency</div>
+            <a href="upload.html" style="font-size:0.78rem;color:var(--accent-primary)">View all →</a>
+          </div>
+          <div class="skill-row">
+            <div class="skill-row-header"><span class="skill-name">React.js</span><span class="skill-pct">94%</span></div>
+            <div class="progress-bar"><div class="progress-fill purple" data-width="94"></div></div>
+          </div>
+          <div class="skill-row">
+            <div class="skill-row-header"><span class="skill-name">Java</span><span class="skill-pct">88%</span></div>
+            <div class="progress-bar"><div class="progress-fill cyan" data-width="88"></div></div>
+          </div>
+          <div class="skill-row">
+            <div class="skill-row-header"><span class="skill-name">Node.js</span><span class="skill-pct">78%</span></div>
+            <div class="progress-bar"><div class="progress-fill green" data-width="78"></div></div>
+          </div>
+          <div class="skill-row">
+            <div class="skill-row-header"><span class="skill-name">Python</span><span class="skill-pct">65%</span></div>
+            <div class="progress-bar"><div class="progress-fill orange" data-width="65"></div></div>
+          </div>
+          <div class="skill-row">
+            <div class="skill-row-header"><span class="skill-name">Machine Learning</span><span class="skill-pct">42%</span></div>
+            <div class="progress-bar"><div class="progress-fill pink" data-width="42"></div></div>
+          </div>
+        </div>
+
+        <!-- Career Roadmap -->
+        <div class="card">
+          <div class="section-header">
+            <div class="section-title-sm">🗺️ Career Roadmap</div>
+            <span class="badge badge-cyan">In Progress</span>
+          </div>
+          <div class="roadmap-timeline">
+            <div class="rt-item">
+              <div class="rt-dot done"></div>
+              <div class="rt-title">Core JavaScript &amp; React</div>
+              <div class="rt-sub">Completed · 3 weeks</div>
+            </div>
+            <div class="rt-item">
+              <div class="rt-dot done"></div>
+              <div class="rt-title">REST APIs &amp; Node.js</div>
+              <div class="rt-sub">Completed · 2 weeks</div>
+            </div>
+            <div class="rt-item">
+              <div class="rt-dot active"></div>
+              <div class="rt-title">Cloud Computing (AWS)</div>
+              <div class="rt-sub">In Progress · 60% done</div>
+            </div>
+            <div class="rt-item">
+              <div class="rt-dot pending"></div>
+              <div class="rt-title">Docker &amp; Kubernetes</div>
+              <div class="rt-sub">Upcoming · Est. 3 weeks</div>
+            </div>
+            <div class="rt-item">
+              <div class="rt-dot pending"></div>
+              <div class="rt-title">System Design Interview</div>
+              <div class="rt-sub">Upcoming · Est. 2 weeks</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Alerts &amp; Recommended -->
+        <div style="display:flex;flex-direction:column;gap:1.25rem">
+          <!-- Recommended Courses -->
+          <div class="card" style="flex:1">
+            <div class="section-header">
+              <div class="section-title-sm">🎓 Courses In Progress</div>
+              <a href="learning.html" style="font-size:0.78rem;color:var(--accent-primary)">View all →</a>
+            </div>
+            <div class="course-item">
+              <div class="course-thumb" style="background:rgba(6,182,212,0.12)">☁️</div>
+              <div class="course-info">
+                <div class="course-name">AWS Solutions Architect</div>
+                <div class="course-meta">Coursera · 8h remaining</div>
+              </div>
+              <div class="course-progress">
+                <div class="pct">60%</div>
+                <div style="width:50px;margin-top:4px" class="progress-bar"><div class="progress-fill cyan" data-width="60"></div></div>
+              </div>
+            </div>
+            <div class="course-item">
+              <div class="course-thumb" style="background:rgba(245,158,11,0.12)">🐍</div>
+              <div class="course-info">
+                <div class="course-name">Python for ML</div>
+                <div class="course-meta">Udemy · 12h remaining</div>
+              </div>
+              <div class="course-progress">
+                <div class="pct">35%</div>
+                <div style="width:50px;margin-top:4px" class="progress-bar"><div class="progress-fill orange" data-width="35"></div></div>
+              </div>
+            </div>
+            <div class="course-item">
+              <div class="course-thumb" style="background:rgba(99,102,241,0.12)">🐳</div>
+              <div class="course-info">
+                <div class="course-name">Docker Fundamentals</div>
+                <div class="course-meta">Pluralsight · Not started</div>
+              </div>
+              <div class="course-progress">
+                <div class="pct">0%</div>
+                <div style="width:50px;margin-top:4px" class="progress-bar"><div class="progress-fill purple" data-width="0"></div></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Smart Alerts -->
+          <div class="card">
+            <div class="section-title-sm" style="margin-bottom:1rem">🔔 Smart Alerts</div>
+            <div class="alert-item">
+              <div class="alert-icon">📢</div>
+              <div class="alert-text">
+                <div class="alert-title">Hot skill: Docker is trending</div>
+                <div class="alert-desc">+180% job postings mention Docker this week.</div>
+              </div>
+            </div>
+            <div class="alert-item">
+              <div class="alert-icon">✨</div>
+              <div class="alert-text">
+                <div class="alert-title">New AWS certification available</div>
+                <div class="alert-desc">AWS Developer Associate updated for 2024.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /page-body -->
+  </main>
+</div>
+
+<script src="resumeai.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  initSidebar();
+  initAnimatedNumbers();
+  initProgressBars();
+
+  // Radar Chart
+  const radarCtx = document.getElementById('skillRadarChart');
+  if (radarCtx) {
+    new Chart(radarCtx, {
+      type: 'radar',
+      data: {
+        labels: ['Frontend', 'Backend', 'Cloud', 'ML/AI', 'DevOps', 'Databases'],
+        datasets: [
+          {
+            label: 'Current Skills',
+            data: [88, 72, 45, 40, 30, 75],
+            backgroundColor: 'rgba(99,102,241,0.15)',
+            borderColor: '#6366f1',
+            pointBackgroundColor: '#6366f1',
+            pointRadius: 4,
+            borderWidth: 2
+          },
+          {
+            label: 'Target Role',
+            data: [95, 85, 80, 70, 75, 85],
+            backgroundColor: 'rgba(16,185,129,0.08)',
+            borderColor: '#10b981',
+            pointBackgroundColor: '#10b981',
+            pointRadius: 4,
+            borderWidth: 2,
+            borderDash: [5, 5]
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { labels: { color: '#94a3b8', font: { size: 11 } } } },
+        scales: {
+          r: {
+            min: 0, max: 100,
+            grid: { color: 'rgba(255,255,255,0.05)' },
+            angleLines: { color: 'rgba(255,255,255,0.05)' },
+            ticks: { backdropColor: 'transparent', color: '#64748b', font: { size: 10 }, stepSize: 25 },
+            pointLabels: { color: '#94a3b8', font: { size: 11 } }
+          }
+        }
+      }
+    });
+  }
+
+  // Score Donut
+  const donutCtx = document.getElementById('scoreDonut');
+  if (donutCtx) {
+    new Chart(donutCtx, {
+      type: 'doughnut',
+      data: {
+        datasets: [{
+          data: [87, 13],
+          backgroundColor: ['rgba(99,102,241,1)', 'rgba(255,255,255,0.05)'],
+          borderColor: ['transparent', 'transparent'],
+          borderWidth: 0,
+          circumference: 270,
+          rotation: -135
+        }]
+      },
+      options: {
+        cutout: '78%',
+        plugins: { legend: { display: false }, tooltip: { enabled: false } },
+        animation: { animateRotate: true, duration: 1200 }
+      }
+    });
+  }
+});
+</script>
+</body>
+</html>
