@@ -5,10 +5,12 @@
   "private": true,
   "scripts": {
     "start": "serve . -l 3000",
+    "dev": "browser-sync start --server . --port 3000 --files '*.html, *.css, *.js' --no-notify",
     "validate": "html-validate index.html resumeai.html dashboard.html upload.html learning.html insights.html recruiter.html",
     "test": "npm run validate"
   },
   "devDependencies": {
+    "browser-sync": "^3.0.4",
     "html-validate": "^9.6.0",
     "serve": "^14.2.4"
   }
