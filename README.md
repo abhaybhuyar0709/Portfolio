@@ -8,39 +8,83 @@ A static front-end project built with **HTML, Vanilla CSS, JavaScript, and Chart
 
 ---
 
-## 🚀 Run the project — three ways
+## ⚡ Quickest way to see the preview
+
+> **No install needed** — just open the live deployment:
+>
+> 👉 **https://abhaybhuyar0709.github.io/Portfolio/**
+
+Every time code is pushed to `main`, GitHub Actions automatically rebuilds and publishes the site at that URL.
+
+---
+
+## 🖥️ Run on a server (get a live preview URL)
+
+### Method A — Docker (recommended for any server)
+
+Works on any Linux/Mac/Windows server that has [Docker](https://docs.docker.com/get-docker/) installed. No Node.js required.
+
+```bash
+# 1. Clone the repo
+git clone https://github.com/abhaybhuyar0709/Portfolio.git
+cd Portfolio
+
+# 2. Build and start (one command)
+docker compose up -d
+
+# 3. Open in your browser
+#    - Local machine : http://localhost:3000
+#    - Remote server : http://<your-server-ip>:3000
+```
+
+To stop: `docker compose down`
+
+---
+
+### Method B — Node.js on a server (VPS / cloud VM)
+
+Requires [Node.js 18+](https://nodejs.org/).
+
+```bash
+# 1. Clone the repo
+git clone https://github.com/abhaybhuyar0709/Portfolio.git
+cd Portfolio
+
+# 2. Install tools (once)
+npm install
+
+# 3. Start server — binds to ALL network interfaces (0.0.0.0:3000)
+npm run serve:remote
+```
+
+The site is now accessible at:
+- **http://localhost:3000** (from the same machine)
+- **http://\<your-server-ip\>:3000** (from any device on the internet)
+
+> **Firewall tip:** Make sure port 3000 is open in your server's firewall / security-group rules.
+
+---
+
+## 💻 Run locally (on your own computer)
 
 ### Option 1 — Open directly in a browser (zero setup)
 
-Just double-click any `.html` file (e.g. `index.html`) to open it in your browser.
+Just double-click `index.html` to open it in your browser.  
 No server or installation needed for basic browsing.
 
-### Option 2 — Local dev server with live reload (recommended)
+### Option 2 — Hot-reload dev server (recommended for development)
 
 ```bash
-# 1. Install tools (only once)
-npm install
-
-# 2. Start hot-reload dev server
-npm run dev
+npm install      # once
+npm run dev      # opens http://localhost:3000 — auto-refreshes on save
 ```
-
-Your default browser opens automatically at **http://localhost:3000**.  
-Every time you save a `.html`, `.css`, or `.js` file the browser refreshes instantly.
 
 ### Option 3 — Static server (production-like preview)
 
 ```bash
-npm install      # only needed once
-npm start        # serves at http://localhost:3000
+npm install      # once
+npm start        # http://localhost:3000
 ```
-
-Then open **http://localhost:3000** in any browser.
-
-### Option 4 — Live production site (no install needed)
-
-The site auto-deploys to GitHub Pages on every push to `main`.  
-Visit the live URL: **https://abhaybhuyar0709.github.io/Portfolio/**
 
 ---
 
@@ -87,7 +131,7 @@ Visit the live URL: **https://abhaybhuyar0709.github.io/Portfolio/**
 
 ```bash
 npm install      # only needed once
-npm test         # validates all HTML pages — exits 0 means all passed
+npm test         # validates all HTML pages — exit code 0 means all passed
 ```
 
 ---
@@ -108,11 +152,12 @@ Portfolio/
 ├── script.js           # Portfolio scripts
 ├── resumeai.js         # ResumeAI shared scripts
 ├── chart.min.js        # Chart.js (bundled locally)
+├── Dockerfile          # nginx container — docker compose up
+├── docker-compose.yml  # One-command server deployment
 ├── screenshots/        # Page preview screenshots
-├── package.json        # npm scripts (start / dev / test)
+├── package.json        # npm scripts (start / serve:remote / dev / test)
 ├── .htmlvalidate.json  # HTML validation config
 └── .github/
     └── workflows/
         └── deploy.yml  # GitHub Actions → GitHub Pages auto-deploy
 ```
-
